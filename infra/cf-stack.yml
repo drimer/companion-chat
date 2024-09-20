@@ -13,7 +13,7 @@ Resources:
     FunctionName: "companion-chat-api-fn"
     Properties:
       MemorySize: 512
-      Handler: com.companion.companionchat.CompanionChatApplication::main
+      Handler: com.companion.companionchat.LambdaHandler::handleRequest
       Runtime: java21
       CodeUri: "../build/distributions/companion-chat-0.0.1-SNAPSHOT.zip"
       Policies:
