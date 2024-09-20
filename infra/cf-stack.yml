@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Companion Chat App - Deployed using SAM
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  CompanionChatFunction:
+    Type: AWS::Serverless::Function
+    FunctionName: "companion-chat-api-fn"
+    Properties:
+      MemorySize: 512
+      Handler: com.companion.companionchat.CompanionChatApplication::main
+      Runtime: java21
+      CodeUri: "../build/distributions/companion-chat-0.0.1-SNAPSHOT.zip"
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId:
+              Ref: CompanionChatApi
+            Path: /
+            Method: GET
+
+  CompanionChatApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: dev
+
+
+Outputs:
+  CompanionChatEndpoint:
+    Description: API Gateway endpoint URL for Companion Chat App
+    Value: !Sub 'https://${CompanionChatApi}.execute-api.${AWS::Region}.amazonaws.com/dev/'
