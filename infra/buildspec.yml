@@ -6,6 +6,8 @@ phases:
       java: corretto11
   build:
     commands:
+      - echo "hi this is a test"
+      - ./test.sh
       - ./infra/scripts/deploy-companion-api-lambda.sh
 cache:
   paths:
