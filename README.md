@@ -12,7 +12,8 @@ Companion Chat app - for all your needs
    "s3:*",
    "cloudformation:*",
    "lambda:*",
-   "logs:*"
+   "logs:*",
+   "apigateway:*"
    ```
 
 # Processes requiring manual intervention
