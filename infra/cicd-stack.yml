@@ -34,3 +34,60 @@ Resources:
     Properties:
       LogGroupName: !Sub '/aws/codebuild/companion-chat-cicd-sam-deploy'
       RetentionInDays: 5
+
+  CicdPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: "companion-chat-cicd-pipeline" # TODO: Use parametrised namespace
+      RoleArn: "arn:aws:iam::484907525991:role/service-role/code-pipeline-cchat-deployment-role" # TODO: Create this and reference here
+      ArtifactStore:
+        Type: S3
+        Location: "codepipeline-eu-west-2-984985676594" # TODO: Create bucket and reference here
+      Stages:
+        - Name: "Source"
+          Actions:
+            - Name: "Source"
+              ActionTypeId:
+                Category: "Source"
+                Owner: "AWS"
+                Provider: "CodeStarSourceConnection"
+                Version: "1"
+              RunOrder: 1
+              Configuration:
+                BranchName: "main"
+                ConnectionArn: "arn:aws:codestar-connections:eu-west-2:484907525991:connection/60c0a37a-456f-45a0-9fed-180d1f2de1ed" # TODO: Parametrise this
+                DetectChanges: "false"
+                FullRepositoryId: "drimer/companion-chat"
+                OutputArtifactFormat: "CODE_ZIP"
+              OutputArtifacts:
+                - Name: "SourceArtifact"
+              Region: "eu-west-2"
+              Namespace: "SourceVariables"
+        - Name: "SAM-Deploy"
+          Actions:
+            - Name: "SAM-Deploy"
+              ActionTypeId:
+                Category: "Build"
+                Owner: "AWS"
+                Provider: "CodeBuild"
+                Version: "1"
+              RunOrder: 1
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              OutputArtifacts:
+                - Name: "BuildArtifact"
+              InputArtifacts:
+                - Name: "SourceArtifact"
+              Region: "eu-west-2"
+              Namespace: "BuildVariables"
+      Version: 1
+      ExecutionMode: "QUEUED"
+      PipelineType: "V2"
+      Triggers:
+        - ProviderType: "CodeStarSourceConnection"
+          GitConfiguration:
+            SourceActionName: "Source"
+            Push:
+              - Branches:
+                  Includes:
+                    - "main"
