@@ -32,6 +32,10 @@ Resources:
     Properties:
       StageName: dev
 
+#  CiCd:
+#    Type: AWS::Serverless::Application
+#    Properties:
+#      Location: ./cicd.yml
 
 Outputs:
   CompanionChatEndpoint:
