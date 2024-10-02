@@ -24,7 +24,7 @@ Resources:
           Properties:
             RestApiId:
               Ref: CompanionChatApi
-            Path: /
+            Path: /hello-world
             Method: GET
 
   CompanionChatApi:
