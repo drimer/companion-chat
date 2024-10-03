@@ -63,9 +63,9 @@ Resources:
                 - Name: "SourceArtifact"
               Region: "eu-west-2"
               Namespace: "SourceVariables"
-        - Name: "SAM-Deploy"
+        - Name: "SAM-Deploy-Dev"
           Actions:
-            - Name: "SAM-Deploy"
+            - Name: "SAM-Deploy-Dev"
               ActionTypeId:
                 Category: "Build"
                 Owner: "AWS"
@@ -74,6 +74,7 @@ Resources:
               RunOrder: 1
               Configuration:
                 ProjectName: !Ref CodeBuildProject
+                EnvironmentVariables: '[{"name": "ENVIRONMENT", "type": "PLAINTEXT", "value": "dev"}]'
               OutputArtifacts:
                 - Name: "BuildArtifact"
               InputArtifacts:

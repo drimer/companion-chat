@@ -7,7 +7,7 @@ phases:
     commands:
       - echo "hi this is a test"
       - ./test.sh
-      - ./infra/scripts/deploy-companion-api-lambda.sh
+      - ./infra/scripts/deploy-companion-chat-app.sh
 cache:
   paths:
     - '/root/.gradle/caches/**/*'
