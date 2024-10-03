@@ -7,11 +7,22 @@ Globals:
   Function:
     Timeout: 30
 
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - prod
+
 Resources:
   CompanionChatFunction:
     Type: AWS::Serverless::Function
-    FunctionName: "companion-chat-api-fn"
     Properties:
+      FunctionName: !Join
+        - '-'
+        - - !Ref Environment
+          - 'companion-chat-api-fn'
       MemorySize: 512
       Handler: com.companion.companionchat.LambdaHandler::handleRequest
       Runtime: java21
@@ -30,7 +41,10 @@ Resources:
   CompanionChatApiGateway:
     Type: AWS::Serverless::HttpApi
     Properties:
-      Name: "companion-chat-api-gateway"
+      Name: !Join
+        - '-'
+        - - !Ref Environment
+          - 'companion-chat-api-gateway'
 
 Outputs:
   CompanionChatEndpoint:
