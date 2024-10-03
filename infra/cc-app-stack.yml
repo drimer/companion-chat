@@ -11,13 +11,71 @@ Parameters:
   Environment:
     Type: String
     Default: dev
-    AllowedValues:
-      - dev
-      - prod
 
 Resources:
+  PersonasDynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Join
+        - '-'
+        - - !Ref Environment
+          - 'personas-table'
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: N
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  BasicLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      RoleName:
+        Fn::Join:
+          - '-'
+          - - !Ref Environment
+            - 'basic-lambda-role'
+
+  ChatFunctionReadWriteToDbPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Join
+        - '-'
+        - - !Ref Environment
+          - 'chat-function-read-write-to-db-policy'
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - 'dynamodb:BatchGetItem'
+              - 'dynamodb:PutItem'
+              - 'dynamodb:DescribeTable'
+              - 'dynamodb:GetItem'
+              - 'dynamodb:Scan'
+              - 'dynamodb:Query'
+              - 'dynamodb:UpdateItem'
+            Resource: '*'
+      Roles:
+        - !Ref BasicLambdaRole
+
   CompanionChatFunction:
     Type: AWS::Serverless::Function
+    DependsOn: ChatFunctionReadWriteToDbPolicy
     Properties:
       FunctionName: !Join
         - '-'
@@ -27,8 +85,7 @@ Resources:
       Handler: com.companion.companionchat.LambdaHandler::handleRequest
       Runtime: java21
       CodeUri: "../build/distributions/companion-chat-0.0.1-SNAPSHOT.zip"
-      Policies:
-        - AWSLambdaBasicExecutionRole
+      Role: !GetAtt BasicLambdaRole.Arn
       Events:
         ApiEvent:
           Type: HttpApi

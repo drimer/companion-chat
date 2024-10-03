@@ -23,7 +23,7 @@ Companion Chat app - for all your needs
 In order to apply changes to the pipeline config, run the script
 `./infra/scripts/deploy-cicd-setup.sh`.
 
-##
+## Notes to self
 
 Things to add to CF template:
 
@@ -31,3 +31,10 @@ Things to add to CF template:
 - CodeBuild project
 - CodePipeline role(s)
 - CodePipeline pipeline
+
+# Tips for faster development
+
+To deploy the app to a sandbox, without having to commit and push:
+```shell
+ENVIRONMENT=aaj ./infra/scripts/deploy-companion-chat-app.sh
+```
