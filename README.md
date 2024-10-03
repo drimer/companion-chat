@@ -13,7 +13,8 @@ Companion Chat app - for all your needs
    "cloudformation:*",
    "lambda:*",
    "logs:*",
-   "apigateway:*"
+   "apigateway:*",
+   "dynamodb:*"
    ```
 
 # Processes requiring manual intervention
@@ -35,6 +36,7 @@ Things to add to CF template:
 # Tips for faster development
 
 To deploy the app to a sandbox, without having to commit and push:
+
 ```shell
 ENVIRONMENT=aaj ./infra/scripts/deploy-companion-chat-app.sh
 ```
