@@ -20,24 +20,19 @@ Resources:
         - AWSLambdaBasicExecutionRole
       Events:
         ApiEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
-            RestApiId:
-              Ref: CompanionChatApi
-            Path: /hello-world
-            Method: GET
+            ApiId:
+              Ref: CompanionChatApiGateway
+            Path: /{proxy+}
+            Method: ANY
 
-  CompanionChatApi:
-    Type: AWS::Serverless::Api
+  CompanionChatApiGateway:
+    Type: AWS::Serverless::HttpApi
     Properties:
-      StageName: dev
-
-#  CiCd:
-#    Type: AWS::Serverless::Application
-#    Properties:
-#      Location: ./cicd.yml
+      Name: "companion-chat-api-gateway"
 
 Outputs:
   CompanionChatEndpoint:
     Description: API Gateway endpoint URL for Companion Chat App
-    Value: !Sub 'https://${CompanionChatApi}.execute-api.${AWS::Region}.amazonaws.com/dev/'
+    Value: !Sub 'https://${CompanionChatApiGateway}.execute-api.${AWS::Region}.amazonaws.com/dev/'
