@@ -18,7 +18,7 @@ resource "aws_iam_role" "api_lambda_role" {
 
 data "archive_file" "api_lambda_archive_file" {
   type        = "zip"
-  source_file = "${path.module}/../../../../build/libs/companion-chat-0.0.1-SNAPSHOT.jar"
+  source_file = "${path.module}/../../../../build/libs/companion-chat-0.0.1-SNAPSHOT-plain.jar"
   output_path = "api_lambda_function_payload.zip"
 }
 
@@ -27,7 +27,7 @@ resource "aws_lambda_function" "test_lambda" {
   filename = data.archive_file.api_lambda_archive_file.output_path
   function_name = join("-", compact(tolist([var.group, var.environment, var.scope, var.lambda_function_name])))
   role          = aws_iam_role.api_lambda_role.arn
-  handler       = "index.test"
+  handler       = "com.companion.companionchat.LambdaHandler::handleRequest"
 
   source_code_hash = data.archive_file.api_lambda_archive_file.output_base64sha256
 
