@@ -3,6 +3,7 @@
 
 # Distribution and build files
 build/
+.gradle/
 
 # Log file
 *.log
@@ -26,5 +27,5 @@ build/
 hs_err_pid*
 replay_pid*
 
-# SAM
-*packaged.yml
+# Terraform
+**/.terraform**

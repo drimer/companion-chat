@@ -41,3 +41,12 @@ module "db" {
     billing_mode = "PAY_PER_REQUEST"
 }
 
+module "api" {
+    source = "../../modules/api"
+    group = local.group_global
+    environment = local.environment
+    scope = "chat"
+    lambda_function_name = "companion-chat-api"
+    lambda_function_handler = "index.test"
+    lambda_function_runtime = "java21"
+}
