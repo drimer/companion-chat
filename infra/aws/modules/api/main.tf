@@ -18,7 +18,7 @@ resource "aws_iam_role" "api_lambda_role" {
 
 data "archive_file" "api_lambda_archive_file" {
   type        = "zip"
-  source_file = "${path.module}/../../../../build/distributions/companion-chat-0.0.1-SNAPSHOT.jar"
+  source_file = "${path.module}/../../../../build/distributions/companion-chat-0.0.1-SNAPSHOT.zip"
   output_path = "api_lambda_function_payload.zip"
 }
 
