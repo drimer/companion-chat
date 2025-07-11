@@ -2,6 +2,7 @@ from typing import List
 from uuid import UUID
 
 from fastapi import FastAPI
+from mangum import Mangum
 from pydantic import BaseModel, Field
 
 
@@ -45,3 +46,7 @@ async def create_conversation() -> Conversation:
     message list. The ID is a fixed UUID to match the model's type.
     """
     return Conversation(id=UUID("f47ac10b-58cc-4372-a567-0e02b2c3d479"))
+
+
+# Create the handler that AWS Lambda will invoke
+handler = Mangum(app, lifespan="off")
