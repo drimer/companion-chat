@@ -47,6 +47,6 @@ module "api" {
     environment = local.environment
     scope = "chat"
     lambda_function_name = "companion-chat-api"
-    lambda_function_handler = "index.test"
-    lambda_function_runtime = "java21"
+    lambda_function_handler = "src.companionchat.main:app"
+    lambda_function_runtime = "python3.10"
 }

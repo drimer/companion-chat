@@ -19,9 +19,9 @@ resource "aws_iam_role" "api_lambda_role" {
 resource "aws_lambda_function" "test_lambda" {
   function_name = join("-", compact(tolist([var.group, var.environment, var.scope, var.lambda_function_name])))
   role          = aws_iam_role.api_lambda_role.arn
-  handler       = "com.companion.companionchat.LambdaHandler::handleRequest"
-  filename = "${path.module}/../../../../build/distributions/companion-chat-0.0.1-SNAPSHOT.zip"
-  source_code_hash = filebase64sha256("${path.module}/../../../../build/distributions/companion-chat-0.0.1-SNAPSHOT.zip")
+  handler       = var.lambda_function_handler
+  filename = "${path.module}/../../../../deployment.zip"
+  source_code_hash = filebase64sha256("${path.module}/../../../../deployment.zip")
   runtime = var.lambda_function_runtime
   memory_size = 128
   timeout = 30
