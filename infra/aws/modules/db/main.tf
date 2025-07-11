@@ -1,4 +1,4 @@
-+locals {
+locals {
     table_name = join("-", compact(tolist([var.group, var.environment, var.scope, var.table_name, "db"])))
 }
 
