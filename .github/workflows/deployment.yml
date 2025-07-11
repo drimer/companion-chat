@@ -33,7 +33,7 @@ jobs:
           key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Install dependencies
-        run: poetry install --no-dev --no-interaction
+        run: poetry install --no-interaction
 
       - name: Build deployment package
         run: |
