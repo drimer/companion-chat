@@ -3,7 +3,7 @@ name: Deployment pipeline
 on:
   push:
     branches:
-      - terraform-for-infra
+      - use-fast-api
 
 permissions:
   contents: read # for actions/checkout
