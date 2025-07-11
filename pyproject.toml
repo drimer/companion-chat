@@ -1,0 +1,56 @@
+# PEP 518: Specifies build system requirements for Python projects.
+# This section is mandatory for Poetry projects.
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "companion-chat"
+version = "0.1.0"
+description = "Companion Chat app - for all your needs"
+authors = ["Alberto Aguilera <albertoaguileraj@gmail.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+# homepage = "https://my-awesome-project.com"
+# documentation = "https://docs.my-awesome-project.com"
+repository = "https://github.com/drimer/companion-chat"
+
+packages = [{include = "companionchat", from = "src"}]
+
+# -----------------------------------------------------------------------------
+# Poetry Configuration
+# -----------------------------------------------------------------------------
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = {extras = ["all"], version = "^0.110.0"}
+mangum = "^0.19.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+black = "^23.7.0"
+ruff = "^0.1.0"
+mypy = "^1.5.0"
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
+
+# -----------------------------------------------------------------------------
+# Other Tool Configurations
+# -----------------------------------------------------------------------------
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.ruff]
+line-length = 88
+select = ["E", "F", "W", "I", "UP", "C4", "B"] # A good starting set of rules
+
+[tool.mypy]
+strict = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = ["tests"]

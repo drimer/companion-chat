@@ -4,39 +4,52 @@ Companion Chat app - for all your needs
 
 # Manual steps needed before using any script
 
-1. Create an S3 bucket for storing SAM templates.
-   1.1. Replace the bucket name in the script `./infra/scripts/deploy-companion-api-lambda.sh`
-2. Create a service roles for CodeBuild that allows the following:
-   ```
-   "iam:*",
-   "s3:*",
-   "cloudformation:*",
-   "lambda:*",
-   "logs:*",
-   "apigateway:*",
-   "dynamodb:*"
-   ```
+1. Create an S3 bucket with the name `companion-chat-terraform-state`.
+
+2. Create a user for Terraform and attach the following policy:
+   
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Sid": "VisualEditor0",
+			"Effect": "Allow",
+			"Action": [
+				"s3:*",
+				"dynamodb:*"
+			],
+			"Resource": "*"
+		}
+	]
+}
+```
+
+
+# Setup for local development
+
+1. Make sure you have `poetry` installed: https://pypi.org/project/poetry/
+
+2. To install all the dev dependencies:
+
+```bash
+poetry install
+```
+
+3. To run the server:
+
+```bash
+poetry run uvicorn src.companionchat.main:app --reload
+```
+
 
 # Processes requiring manual intervention
 
-## Changes to the pipeline config
+## Deployment
 
-In order to apply changes to the pipeline config, run the script
-`./infra/scripts/deploy-cicd-setup.sh`.
-
-## Notes to self
-
-Things to add to CF template:
-
-- CodeBuild role(s)
-- CodeBuild project
-- CodePipeline role(s)
-- CodePipeline pipeline
-
-# Tips for faster development
-
-To deploy the app to a sandbox, without having to commit and push:
+For now, it's manual. This will need to be part of a pipeline later:
 
 ```shell
-ENVIRONMENT=aaj ./infra/scripts/deploy-companion-chat-app.sh
+terraform plan
+terraform apply
 ```
