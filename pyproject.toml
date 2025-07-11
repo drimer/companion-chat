@@ -17,6 +17,10 @@ repository = "https://github.com/drimer/companion-chat"
 
 packages = [{include = "companionchat", from = "src"}]
 
+# -----------------------------------------------------------------------------
+# Poetry Configuration
+# -----------------------------------------------------------------------------
+
 [tool.poetry.dependencies]
 python = "^3.10"
 fastapi = {extras = ["all"], version = "^0.110.0"}
@@ -28,8 +32,11 @@ black = "^23.7.0"
 ruff = "^0.1.0"
 mypy = "^1.5.0"
 
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
+
 # -----------------------------------------------------------------------------
-# Tool Configurations
+# Other Tool Configurations
 # -----------------------------------------------------------------------------
 [tool.black]
 line-length = 88
