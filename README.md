@@ -26,6 +26,23 @@ Companion Chat app - for all your needs
 ```
 
 
+# Setup for local development
+
+1. Make sure you have `poetry` installed: https://pypi.org/project/poetry/
+
+2. To install all the dev dependencies:
+
+```bash
+poetry install
+```
+
+3. To run the server:
+
+```bash
+poetry run uvicorn src.companionchat.main:app --reload
+```
+
+
 # Processes requiring manual intervention
 
 ## Deployment
