@@ -1,5 +1,4 @@
 from contextlib import asynccontextmanager
-from uuid import UUID
 
 import aioboto3
 from fastapi import FastAPI
@@ -37,8 +36,8 @@ async def create_conversation(
     For now, this endpoint returns a hardcoded conversation with an empty
     message list. The ID is a fixed UUID to match the model's type.
     """
-    conversation_repository.create()
-    return BaseConversation(id=UUID("f47ac10b-58cc-4372-a567-0e02b2c3d479"))
+    conversation = await conversation_repository.create()
+    return BaseConversation(id=conversation.id, messages=[])
 
 
 # Create the handler that AWS Lambda will invoke

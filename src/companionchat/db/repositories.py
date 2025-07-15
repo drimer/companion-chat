@@ -1,26 +1,26 @@
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from types_aiobotocore_dynamodb import DynamoDBClient
 
-from src.companionchat.schemas.conversations import BaseConversation
+from companionchat.db.models import Conversation
 
 
 class ConversationRepository:
     def __init__(self, client: DynamoDBClient):
         self.client = client
 
-    async def create(self) -> BaseConversation:
+    async def create(self) -> Conversation:
         try:
-            response = await self.client.put_item(
+            conversation_id = uuid4()
+            await self.client.put_item(
                 TableName="conversations",
                 Item={
-                    "id": {"S": str(uuid4())},
+                    "id": {"S": str(conversation_id)},
                     "messages": {"L": []},
                 },
             )
-
-            return BaseConversation(
-                id=UUID(response["Attributes"]["id"]["S"]),
+            return Conversation(
+                id=conversation_id,
                 messages=[],
             )
         except Exception as e:
