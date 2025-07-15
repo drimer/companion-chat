@@ -5,8 +5,8 @@ from botocore.config import Config
 from fastapi import Depends, Request
 from types_aiobotocore_dynamodb import DynamoDBClient
 
-from companionchat.settings import get_settings
-from src.companionchat.db.repositories import ConversationRepository
+from .db.repositories import ConversationRepository
+from .settings import get_settings
 
 DbContextDependency = Callable[..., AsyncGenerator[Any, None]]
 

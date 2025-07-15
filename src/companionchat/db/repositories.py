@@ -2,7 +2,7 @@ from uuid import uuid4
 
 from types_aiobotocore_dynamodb import DynamoDBClient
 
-from companionchat.db.models import Conversation
+from .models import Conversation
 
 
 class ConversationRepository:
