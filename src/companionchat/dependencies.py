@@ -5,6 +5,7 @@ from botocore.config import Config
 from fastapi import Depends, Request
 from types_aiobotocore_dynamodb import DynamoDBClient
 
+from companionchat.settings import get_settings
 from src.companionchat.db.repositories import ConversationRepository
 
 DbContextDependency = Callable[..., AsyncGenerator[Any, None]]
@@ -14,13 +15,15 @@ def get_db_context() -> DbContextDependency:
     async def get_dynamo_context(
         request: Request,
     ) -> AsyncGenerator[DynamoDBClient, None]:
+        settings = get_settings()
+
         # Get the session from app state
         session = request.app.state.dynamodb_session
 
         # Create a client for this request using the shared session
         async with session.client(
             "dynamodb",
-            endpoint_url="http://localhost:8000",  # TODO: use real one
+            endpoint_url=settings.AWS_ENDPOINT_URL,
             config=Config(
                 connect_timeout=5.0, read_timeout=10.0, retries={"max_attempts": 3}
             ),

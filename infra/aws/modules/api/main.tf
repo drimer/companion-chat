@@ -28,7 +28,7 @@ resource "aws_lambda_function" "test_lambda" {
 
   environment {
     variables = {
-      foo = "bar"
+      AWS_ENDPOINT_URL = ""
     }
   }
 }
