@@ -1,28 +1,13 @@
-from contextlib import asynccontextmanager
-
-import aioboto3
 from fastapi import FastAPI
 from mangum import Mangum
 
 from src.companionchat.dependencies import ConversationRepositoryDep
 from src.companionchat.schemas.conversations import BaseConversation
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    app.state.dynamodb_session = aioboto3.session.Session(
-        aws_access_key_id="dummy",  # TODO: use real one
-        aws_secret_access_key="dummy",  # TODO: use real one
-        region_name="us-east-1",  # TODO: use real one
-    )
-    yield
-
-
 app = FastAPI(
     title="Companion Chat API",
     description="API for managing conversations with your companion.",
     version="0.1.0",
-    lifespan=lifespan,
 )
 
 

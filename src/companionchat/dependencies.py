@@ -1,6 +1,7 @@
 from functools import lru_cache
 from typing import Annotated, Any, AsyncGenerator, Callable
 
+import aioboto3
 from botocore.config import Config
 from fastapi import Depends, Request
 from types_aiobotocore_dynamodb import DynamoDBClient
@@ -11,24 +12,30 @@ from src.companionchat.settings import get_settings
 DbContextDependency = Callable[..., AsyncGenerator[Any, None]]
 
 
+def create_dynamodb_client_context():
+    """Creates a context manager for a DynamoDB client."""
+    settings = get_settings()
+    # Let aioboto3 find credentials from the environment (preferred for Lambda)
+    # or use the ones from settings (useful for local development).
+    session = aioboto3.session.Session(
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_REGION,
+    )
+    return session.client(
+        "dynamodb",
+        endpoint_url=settings.AWS_ENDPOINT_URL,
+        config=Config(
+            connect_timeout=5.0, read_timeout=10.0, retries={"max_attempts": 3}
+        ),
+    )
+
+
 def get_db_context() -> DbContextDependency:
     async def get_dynamo_context(
         request: Request,
     ) -> AsyncGenerator[DynamoDBClient, None]:
-        settings = get_settings()
-
-        # Get the session from app state
-        session = request.app.state.dynamodb_session
-
-        # Create a client for this request using the shared session
-        async with session.client(
-            "dynamodb",
-            endpoint_url=settings.AWS_ENDPOINT_URL,
-            config=Config(
-                connect_timeout=5.0, read_timeout=10.0, retries={"max_attempts": 3}
-            ),
-        ) as dynamodb_client:
-            dynamodb_client: DynamoDBClient
+        async with create_dynamodb_client_context() as dynamodb_client:
             yield dynamodb_client
 
     return get_dynamo_context
