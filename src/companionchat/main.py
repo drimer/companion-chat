@@ -4,8 +4,8 @@ import aioboto3
 from fastapi import FastAPI
 from mangum import Mangum
 
-from .dependencies import ConversationRepositoryDep
-from .schemas.conversations import BaseConversation
+from src.companionchat.dependencies import ConversationRepositoryDep
+from src.companionchat.schemas.conversations import BaseConversation
 
 
 @asynccontextmanager
