@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    AWS_ENDPOINT_URL: str = None
+    AWS_ENDPOINT_URL: str = ""
     AWS_REGION: str | None = "eu-west-2"
     AWS_ACCESS_KEY_ID: str | None = None
     AWS_SECRET_ACCESS_KEY: str | None = None
