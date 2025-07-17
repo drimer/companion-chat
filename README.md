@@ -63,9 +63,10 @@ poetry run uvicorn src.companionchat.main:app --reload --port 4000
 
 ## Deployment
 
-For now, it's manual. This will need to be part of a pipeline later:
+Deploymnets are automated with GitHub actions, but here are some useful commands:
 
-```shell
-terraform plan
-terraform apply
+- Do a terraform plan locally (requires downloading deployment.zip from a GitHub action):
+
+```bash
+terraform -chdir=infra/aws/environments/dev plan -out=tfplan
 ```

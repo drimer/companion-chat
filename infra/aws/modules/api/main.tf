@@ -16,6 +16,29 @@ resource "aws_iam_role" "api_lambda_role" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
+resource "aws_iam_policy" "api_lambda_policy" {
+  name = "api_lambda_policy"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Action": [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem",
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem"
+        ],
+        "Resource": [
+          "${var.dynamodb_conversations_table_arn}"
+        ]
+      }
+    ]
+  })  
+}
+
 resource "aws_lambda_function" "test_lambda" {
   function_name = join("-", compact(tolist([var.group, var.environment, var.scope, var.lambda_function_name])))
   role          = aws_iam_role.api_lambda_role.arn
