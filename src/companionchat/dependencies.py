@@ -17,18 +17,23 @@ def create_dynamodb_client_context():
     settings = get_settings()
     # Let aioboto3 find credentials from the environment (preferred for Lambda)
     # or use the ones from settings (useful for local development).
-    session = aioboto3.session.Session(
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        region_name=settings.AWS_REGION,
-    )
-    return session.client(
-        "dynamodb",
-        endpoint_url=settings.AWS_ENDPOINT_URL,
-        config=Config(
+    session_params = {
+        "region_name": settings.AWS_REGION,
+    }
+    if settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY:
+        session_params["aws_access_key_id"] = settings.AWS_ACCESS_KEY_ID
+        session_params["aws_secret_access_key"] = settings.AWS_SECRET_ACCESS_KEY
+    session = aioboto3.session.Session(**session_params)
+
+    client_params = {
+        "config": Config(
             connect_timeout=5.0, read_timeout=10.0, retries={"max_attempts": 3}
         ),
-    )
+    }
+    if settings.AWS_ENDPOINT_URL:
+        client_params["endpoint_url"] = settings.AWS_ENDPOINT_URL
+
+    return session.client("dynamodb", **client_params)
 
 
 def get_db_context() -> DbContextDependency:
