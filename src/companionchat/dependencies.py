@@ -25,6 +25,8 @@ def create_dynamodb_client_context():
     if settings.AWS_SECRET_ACCESS_KEY:
         session_params["aws_secret_access_key"] = settings.AWS_SECRET_ACCESS_KEY
 
+    print("session_params", session_params)
+
     session = aioboto3.session.Session(**session_params)
 
     client_params = {
@@ -34,6 +36,8 @@ def create_dynamodb_client_context():
     }
     if settings.AWS_ENDPOINT_URL:
         client_params["endpoint_url"] = settings.AWS_ENDPOINT_URL
+
+    print("client_params", client_params)
 
     return session.client("dynamodb", **client_params)
 
