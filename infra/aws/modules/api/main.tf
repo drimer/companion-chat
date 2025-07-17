@@ -48,10 +48,4 @@ resource "aws_lambda_function" "test_lambda" {
   runtime = var.lambda_function_runtime
   memory_size = 128
   timeout = 30
-
-  environment {
-    variables = {
-      AWS_ENDPOINT_URL = ""
-    }
-  }
 }
