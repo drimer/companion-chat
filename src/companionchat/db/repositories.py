@@ -13,7 +13,7 @@ class ConversationRepository:
         try:
             conversation_id = uuid4()
             await self.client.put_item(
-                TableName="companion-chat-dev-chat-chats-db",
+                TableName="companion-chat-dev-chat-conversations-db",
                 Item={
                     "id": {"S": str(conversation_id)},
                     "messages": {"L": []},
