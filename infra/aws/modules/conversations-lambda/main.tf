@@ -11,13 +11,13 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
-resource "aws_iam_role" "api_lambda_role" {
-  name               = "api_lambda_role"
+resource "aws_iam_role" "conversations_lambda_role" {
+  name               = "conversations_lambda_role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
 }
 
-resource "aws_iam_policy" "api_lambda_policy" {
-  name = "api_lambda_policy"
+resource "aws_iam_policy" "conversations_lambda_policy" {
+  name = "conversations_lambda_policy"
   policy = jsonencode({
     "Version": "2012-10-17",
     "Statement": [
@@ -41,7 +41,7 @@ resource "aws_iam_policy" "api_lambda_policy" {
 
 resource "aws_lambda_function" "test_lambda" {
   function_name = join("-", compact(tolist([var.group, var.environment, var.scope, var.lambda_function_name])))
-  role          = aws_iam_role.api_lambda_role.arn
+  role          = aws_iam_role.conversations_lambda_role.arn
   handler       = var.lambda_function_handler
   filename = "${path.module}/../../../../deployment.zip"
   source_code_hash = filebase64sha256("${path.module}/../../../../deployment.zip")
@@ -50,7 +50,7 @@ resource "aws_lambda_function" "test_lambda" {
   timeout = 30
 }
 
-resource "aws_iam_role_policy_attachment" "api_lambda_policy_attachment" {
-  role = aws_iam_role.api_lambda_role.name
+resource "aws_iam_role_policy_attachment" "conversations_lambda_policy_attachment" {
+  role = aws_iam_role.conversations_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
