@@ -54,3 +54,8 @@ resource "aws_iam_role_policy_attachment" "conversations_lambda_policy_attachmen
   role = aws_iam_role.conversations_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
+
+resource "aws_iam_role_policy_attachment" "conversations_lambda_policy_attachment_2" {
+  role = aws_iam_role.conversations_lambda_role.name
+  policy_arn = aws_iam_policy.conversations_lambda_policy.arn
+}
