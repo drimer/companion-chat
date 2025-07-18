@@ -1,5 +1,6 @@
+import os
 from functools import lru_cache
-from typing import Annotated, Any, AsyncGenerator, Callable
+from typing import Annotated, Any, AsyncGenerator, Callable, Dict
 
 import aioboto3
 from botocore.config import Config
@@ -15,22 +16,24 @@ DbContextDependency = Callable[..., AsyncGenerator[Any, None]]
 def create_dynamodb_client_context():
     """Creates a context manager for a DynamoDB client."""
     settings = get_settings()
+    session_params: Dict[str, Any] = {}
 
-    # Let aioboto3 find credentials from the environment (preferred for Lambda)
-    # or use the ones from settings (useful for local development).
-    session_params = {}
-    if settings.AWS_REGION:
-        session_params["region_name"] = settings.AWS_REGION
+    # Check if we are running in the AWS Lambda environment.
+    is_lambda_env = "AWS_LAMBDA_FUNCTION_NAME" in os.environ
 
-    # Only set credentials if both key and secret are provided in settings.
-    # This is useful for local development. In AWS Lambda, the SDK will
-    # automatically pick up credentials from the execution environment.
-    if settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY:
-        session_params["aws_access_key_id"] = settings.AWS_ACCESS_KEY_ID
-        session_params["aws_secret_access_key"] = settings.AWS_SECRET_ACCESS_KEY
+    # For local development, use credentials from settings if available.
+    # In the AWS Lambda environment, ALWAYS let boto3 find credentials
+    # from the execution role, even if a .env file was packaged by mistake.
+    if not is_lambda_env:
+        if settings.AWS_REGION:
+            session_params["region_name"] = settings.AWS_REGION
+
+        if settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY:
+            print("Using credentials from settings for local development.")
+            session_params["aws_access_key_id"] = settings.AWS_ACCESS_KEY_ID
+            session_params["aws_secret_access_key"] = settings.AWS_SECRET_ACCESS_KEY
 
     print("session_params", session_params)
-
     session = aioboto3.session.Session(**session_params)
 
     client_params = {
@@ -42,7 +45,6 @@ def create_dynamodb_client_context():
         client_params["endpoint_url"] = settings.AWS_ENDPOINT_URL
 
     print("client_params", client_params)
-
     return session.client("dynamodb", **client_params)
 
 
