@@ -15,14 +15,18 @@ DbContextDependency = Callable[..., AsyncGenerator[Any, None]]
 def create_dynamodb_client_context():
     """Creates a context manager for a DynamoDB client."""
     settings = get_settings()
+
     # Let aioboto3 find credentials from the environment (preferred for Lambda)
     # or use the ones from settings (useful for local development).
     session_params = {}
     if settings.AWS_REGION:
         session_params["region_name"] = settings.AWS_REGION
-    if settings.AWS_ACCESS_KEY_ID:
+
+    # Only set credentials if both key and secret are provided in settings.
+    # This is useful for local development. In AWS Lambda, the SDK will
+    # automatically pick up credentials from the execution environment.
+    if settings.AWS_ACCESS_KEY_ID and settings.AWS_SECRET_ACCESS_KEY:
         session_params["aws_access_key_id"] = settings.AWS_ACCESS_KEY_ID
-    if settings.AWS_SECRET_ACCESS_KEY:
         session_params["aws_secret_access_key"] = settings.AWS_SECRET_ACCESS_KEY
 
     print("session_params", session_params)

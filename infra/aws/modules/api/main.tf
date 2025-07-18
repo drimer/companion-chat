@@ -49,3 +49,8 @@ resource "aws_lambda_function" "test_lambda" {
   memory_size = 128
   timeout = 30
 }
+
+resource "aws_iam_role_policy_attachment" "api_lambda_policy_attachment" {
+  role = aws_iam_role.api_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
