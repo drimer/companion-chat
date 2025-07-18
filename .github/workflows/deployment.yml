@@ -3,7 +3,7 @@ name: Deployment pipeline
 on:
   push:
     branches:
-      - use-fast-api
+      - store-conversations-in-db
 
 permissions:
   contents: read # for actions/checkout
@@ -40,6 +40,13 @@ jobs:
           poetry run pip install -r <(poetry export -f requirements.txt) --target ./package
           cp -r ./src ./package/
           cd package && zip -r ../deployment.zip .
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment.zip
+          path: |
+            ./deployment.zip
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3

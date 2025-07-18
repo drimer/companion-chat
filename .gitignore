@@ -18,3 +18,8 @@
 
 # Terraform
 **/.terraform**
+**/tfplan
+
+# Other local development files
+.env
+**/shared-local-instance.db
