@@ -32,7 +32,7 @@ resource "aws_iam_policy" "conversations_lambda_policy" {
           "dynamodb:DeleteItem"
         ],
         "Resource": [
-          "${var.dynamodb_conversations_table_arn}"
+          "${var.db_conversations_table_arn}"
         ]
       }
     ]
@@ -48,6 +48,11 @@ resource "aws_lambda_function" "test_lambda" {
   runtime = var.lambda_function_runtime
   memory_size = 128
   timeout = 30
+  environment {
+    variables = {
+      DB_CONVERSATIONS_TABLE_NAME = var.db_conversations_table_name
+    }
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "conversations_lambda_policy_attachment" {

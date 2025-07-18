@@ -28,7 +28,12 @@ variable "lambda_function_runtime" {
     description = "The runtime for the lambda function"
 }
 
-variable "dynamodb_conversations_table_arn" {
+variable "db_conversations_table_arn" {
     type = string
     description = "The arn for the DynamoDB conversations table"
+}
+
+variable "db_conversations_table_name" {
+    type = string
+    description = "The name for the DynamoDB conversations table"
 }

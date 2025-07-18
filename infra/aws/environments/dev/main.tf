@@ -49,5 +49,6 @@ module "conversations_lambda" {
     lambda_function_name = "conversations-lambda"
     lambda_function_handler = "src.companionchat.main.handler"
     lambda_function_runtime = "python3.10"
-    dynamodb_conversations_table_arn = module.db.conversations_table_arn
+    db_conversations_table_arn = module.db.conversations_table_arn
+    db_conversations_table_name = module.db.conversations_table_name
 }
