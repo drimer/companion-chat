@@ -34,7 +34,7 @@ locals {
 
 module "db" {
     source = "../../modules/db"
-    table_name = "chats"
+    table_name = "conversations"
     group = local.group_global
     environment = local.environment
     scope = "chat"
