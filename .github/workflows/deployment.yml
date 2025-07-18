@@ -3,7 +3,7 @@ name: Deployment pipeline
 on:
   push:
     branches:
-      - store-conversations-in-db
+      - main
 
 permissions:
   contents: read # for actions/checkout
