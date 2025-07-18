@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     )
 
     @property
-    def is_aws_lambda_environment() -> bool:
+    def is_aws_lambda_environment(self) -> bool:
         return "AWS_LAMBDA_FUNCTION_NAME" in os.environ
 
 
