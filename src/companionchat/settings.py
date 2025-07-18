@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -14,6 +15,10 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=True,
     )
+
+    @property
+    def is_aws_lambda_environment() -> bool:
+        return "AWS_LAMBDA_FUNCTION_NAME" in os.environ
 
 
 @lru_cache
