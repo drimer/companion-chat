@@ -6,14 +6,15 @@ from src.companionchat.db.models import Conversation
 
 
 class ConversationRepository:
-    def __init__(self, client: DynamoDBClient):
+    def __init__(self, client: DynamoDBClient, table_name: str):
         self.client = client
+        self.table_name = table_name
 
     async def create(self) -> Conversation:
         try:
             conversation_id = uuid4()
             await self.client.put_item(
-                TableName="companion-chat-dev-chat-conversations-db",
+                TableName=self.table_name,
                 Item={
                     "id": {"S": str(conversation_id)},
                     "messages": {"L": []},

@@ -59,7 +59,7 @@ DB_CONTEXT = get_db_context()
 def get_conversation_repository(
     db: DynamoDBClient = Depends(DB_CONTEXT),
 ) -> ConversationRepository:
-    return ConversationRepository(db)
+    return ConversationRepository(db, get_settings().DB_CONVERSATIONS_TABLE_NAME)
 
 
 ConversationRepositoryDep = Annotated[
