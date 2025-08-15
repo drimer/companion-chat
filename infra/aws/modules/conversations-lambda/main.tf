@@ -65,7 +65,7 @@ resource "aws_s3_object" "lambda_deployment_package" {
   bucket = aws_s3_bucket.lambda_deployments.bucket
   key    = "deployment.zip"
   source = "${path.module}/../../../../deployment.zip"
-  etag   = filemd5("${path.module}/../../../../deployment.zip")
+  source_hash = filemd5("${path.module}/../../../../deployment.zip")
 }
 
 resource "aws_lambda_function" "conversations" {
@@ -76,7 +76,6 @@ resource "aws_lambda_function" "conversations" {
   # Use S3 instead of direct file upload
   s3_bucket     = aws_s3_bucket.lambda_deployments.bucket
   s3_key        = aws_s3_object.lambda_deployment_package.key
-  source_code_hash = aws_s3_object.lambda_deployment_package.etag
   
   runtime = var.lambda_function_runtime
   memory_size = 128
