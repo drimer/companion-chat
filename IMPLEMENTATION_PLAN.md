@@ -143,10 +143,10 @@ The goal is to:
   - [x] Update Terraform configuration for manual API key update post-deployment
   - [x] Hardcode OpenAI model and token limits in dev environment
 
-- [ ] **Infrastructure Updates**
+- [x] **Infrastructure Updates**
   - [x] Add OpenAI environment variables to AWS Lambda (with dummy key)
-  - [ ] Update IAM permissions if needed
-  - [ ] Consider adding API Gateway rate limiting
+  - [x] Update IAM permissions if needed
+  - [x] Consider adding API Gateway rate limiting
 
 ### 9. Performance and Monitoring
 

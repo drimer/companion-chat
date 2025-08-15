@@ -154,7 +154,7 @@ poetry run pytest -v
 
 # Deployment
 
-## Manual Setup for AWS Deployment
+## Manual Steps required for a brand new deployment in AWS
 
 1. **Create S3 bucket for Terraform state**:
    ```bash
@@ -182,19 +182,7 @@ poetry run pytest -v
    }
    ```
 
-3. **Validate the infrastructure (optional)**:
-   ```bash
-   # Navigate to dev environment
-   cd infra/aws/environments/dev
-   
-   # Initialize Terraform (if not already done)
-   terraform init
-   
-   # Validate the configuration
-   terraform plan
-   ```
-   
-   Note: Actual deployment should be done via GitHub Actions, not manually.
+3. **Deploy to AWS using GitHub Actions**
 
 4. **Update OpenAI API Key after deployment**:
    The Lambda function is deployed with a dummy OpenAI API key. You need to update it manually via AWS Console:
@@ -224,38 +212,6 @@ terraform -chdir=infra/aws/environments/dev plan
 terraform -chdir=infra/aws/environments/dev init
 ```
 
-# Architecture
-
-## System Design
-
-```
-Client (maintains conversation history)
-    ↓ HTTP Request with full conversation
-FastAPI Application
-    ↓ Conversation metadata lookup
-DynamoDB (conversations table)
-    ↓ Chat processing
-OpenAI API (via Langchain)
-    ↓ AI response
-Client (stores AI response in history)
-```
-
-## Key Components
-
-- **FastAPI App**: Async web server with automatic documentation
-- **DynamoDB**: Stores conversation metadata only (id, system_prompt, user_id, created_at)
-- **OpenAI Service**: Langchain-powered integration with OpenAI GPT models
-- **Conversation Repository**: Database abstraction layer
-- **Dependency Injection**: Clean separation of concerns
-
-## Data Flow
-
-1. **Create Conversation**: Store metadata in DynamoDB
-2. **Chat Request**: Client sends full conversation history + new message
-3. **Process**: Validate conversation exists, send to OpenAI with system prompt
-4. **Response**: Return AI message and token usage to client
-5. **Client**: Stores AI response in local conversation history
-
 # Development
 
 ## Project Structure
@@ -282,15 +238,6 @@ infra/
 ├── aws/               # Terraform infrastructure
 └── docker/            # Local development setup
 ```
-
-## Code Quality
-
-- **Type Hints**: Full Python type annotations
-- **Async/Await**: Non-blocking I/O operations
-- **Dependency Injection**: Testable, maintainable code
-- **Error Handling**: Comprehensive error scenarios
-- **Logging**: Structured logging for monitoring
-- **Testing**: 100% test coverage with multiple test levels
 
 ## Contributing
 
