@@ -12,6 +12,11 @@ class Settings(BaseSettings):
 
     DB_CONVERSATIONS_TABLE_NAME: str = ""
 
+    # OpenAI Configuration
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-4o-mini"
+    MAX_TOKENS: int = 1000
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

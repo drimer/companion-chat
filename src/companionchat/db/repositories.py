@@ -1,8 +1,14 @@
-from uuid import uuid4
+from datetime import datetime, timezone
+from typing import Optional, Union
+from uuid import UUID, uuid4
 
 from types_aiobotocore_dynamodb import DynamoDBClient
 
 from src.companionchat.db.models import Conversation
+
+# Hardcoded constants for now
+DEFAULT_SYSTEM_PROMPT = "You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak."
+DEFAULT_USER_ID = "default-user-123"  # Temporary until authentication is implemented
 
 
 class ConversationRepository:
@@ -13,16 +19,44 @@ class ConversationRepository:
     async def create(self) -> Conversation:
         try:
             conversation_id = uuid4()
+            created_at = datetime.now(timezone.utc)
+
             await self.client.put_item(
                 TableName=self.table_name,
                 Item={
                     "id": {"S": str(conversation_id)},
-                    "messages": {"L": []},
+                    "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
+                    "user_id": {"S": DEFAULT_USER_ID},
+                    "created_at": {"S": created_at.isoformat()},
                 },
             )
             return Conversation(
                 id=conversation_id,
-                messages=[],
+                system_prompt=DEFAULT_SYSTEM_PROMPT,
+                user_id=DEFAULT_USER_ID,
+                created_at=created_at,
             )
         except Exception as e:
             raise Exception(f"Error creating conversation: {e}")
+
+    async def get(self, conversation_id: Union[str, UUID]) -> Optional[Conversation]:
+        try:
+            # Convert UUID to string if necessary
+            id_str = str(conversation_id)
+
+            response = await self.client.get_item(
+                TableName=self.table_name,
+                Key={"id": {"S": id_str}},
+            )
+            item = response.get("Item")
+            if not item:
+                return None  # Return None instead of raising ValueError
+
+            return Conversation(
+                id=UUID(item["id"]["S"]),  # Convert string back to UUID
+                system_prompt=item["system_prompt"]["S"],
+                user_id=item["user_id"]["S"],
+                created_at=datetime.fromisoformat(item["created_at"]["S"]),
+            )
+        except Exception as e:
+            raise Exception(f"Error retrieving conversation: {e}")
