@@ -49,3 +49,9 @@ variable "max_tokens" {
     description = "Maximum tokens for OpenAI responses"
     default = "1000"
 }
+
+variable "deployment_package_key" {
+    type = string
+    description = "S3 key for the Lambda deployment package"
+    default = "deployment.zip"
+}
