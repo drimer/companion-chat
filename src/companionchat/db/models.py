@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from uuid import UUID
 
 
@@ -11,4 +12,6 @@ class Message:
 @dataclass
 class Conversation:
     id: UUID
-    messages: list[Message]
+    system_prompt: str
+    user_id: str
+    created_at: datetime

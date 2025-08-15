@@ -50,7 +50,8 @@ aws dynamodb create-table --table-name conversations --attribute-definitions Att
 
 ```bash
 poetry install
-```
+```hr
+
 
 7. To run the server:
 
