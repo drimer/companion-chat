@@ -3,7 +3,7 @@ name: Deployment pipeline
 on:
   push:
     branches:
-      - main
+      - conversation-endpoints
 
 permissions:
   contents: read # for actions/checkout
