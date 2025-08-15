@@ -4,8 +4,8 @@ from typing import Annotated, Any, AsyncGenerator, Callable, Dict
 import aioboto3
 from botocore.config import Config
 from fastapi import Depends, Request
-from types_aiobotocore_dynamodb import DynamoDBClient
 from langchain_openai import ChatOpenAI
+from types_aiobotocore_dynamodb import DynamoDBClient
 
 from src.companionchat.db.repositories import ConversationRepository
 from src.companionchat.services.openai_service import OpenAIService
@@ -73,6 +73,8 @@ ConversationRepositoryDep = Annotated[
 def get_openai_client() -> ChatOpenAI:
     """Get the ChatOpenAI client instance."""
     settings = get_settings()
+    if not settings.OPENAI_API_KEY:
+        raise ValueError("OPENAI_API_KEY is not set in environment variables")
     return ChatOpenAI(
         openai_api_key=settings.OPENAI_API_KEY,
         model=settings.OPENAI_MODEL,
@@ -81,8 +83,9 @@ def get_openai_client() -> ChatOpenAI:
     )
 
 
-@lru_cache
-def get_openai_service(client: ChatOpenAI = Depends(get_openai_client)) -> OpenAIService:
+def get_openai_service(
+    client: ChatOpenAI = Depends(get_openai_client),
+) -> OpenAIService:
     """Get the OpenAI service instance."""
     return OpenAIService(client)
 

@@ -1,14 +1,11 @@
-from typing import Annotated
-
-from fastapi import Body, FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 
 from src.companionchat.dependencies import ConversationRepositoryDep, OpenAIServiceDep
 from src.companionchat.schemas.conversations import (
-    ConversationCreateRequest,
-    ConversationResponse,
     ChatRequest,
     ChatResponse,
+    ConversationResponse,
 )
 
 app = FastAPI(
@@ -73,22 +70,21 @@ async def chat_with_conversation(
 ) -> ChatResponse:
     """
     Process a chat request with the full conversation history.
-    
+
     This endpoint accepts the complete conversation history from the client
     and sends it to OpenAI for processing. Returns the AI assistant's response.
     """
     try:
         # Verify conversation exists and get system prompt
         conversation = await conversation_repository.get(conversation_id)
-        
+
         # Process chat request with OpenAI
         response = await openai_service.process_chat_request(
-            system_prompt=conversation.system_prompt,
-            chat_request=chat_request
+            system_prompt=conversation.system_prompt, chat_request=chat_request
         )
-        
+
         return response
-        
+
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:

@@ -1,0 +1,79 @@
+{
+	"info": {
+		"_postman_id": "820130ec-252a-4147-ae78-000da7f35322",
+		"name": "CompanionChat",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1419553"
+	},
+	"item": [
+		{
+			"name": "Create Conversation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/conversations",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"conversations"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Conversation",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:4000/conversations/c2a1170c-9d57-4c4c-80b9-f89191955f58",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"conversations",
+						"c2a1170c-9d57-4c4c-80b9-f89191955f58"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Send New Message",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"messages\": [\r\n        {\r\n            \"role\": \"user\",\r\n            \"content\": \"Hi, how are you? daijoubu desu ka?\"\r\n        },\r\n        {\r\n            \"role\": \"assistant\",\r\n            \"content\": \"Hi! I'm doing well, thank you! And yes, daijoubu desu. How about you? 何か話したいことがありますか？\"\r\n        },\r\n        {\r\n            \"role\": \"user\",\r\n            \"content\": \"それは何でしたか。わたしは分かりません\"\r\n        }\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:4000/conversations/755e43d3-bacd-4593-8baa-8fc6865acae7/chat",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "4000",
+					"path": [
+						"conversations",
+						"755e43d3-bacd-4593-8baa-8fc6865acae7",
+						"chat"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from types_aiobotocore_dynamodb import DynamoDBClient
 
-from src.companionchat.db.models import Conversation, Message
+from src.companionchat.db.models import Conversation
 
 # Hardcoded constants for now
 DEFAULT_SYSTEM_PROMPT = "You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak."
@@ -19,7 +19,7 @@ class ConversationRepository:
         try:
             conversation_id = uuid4()
             created_at = datetime.now(timezone.utc)
-            
+
             await self.client.put_item(
                 TableName=self.table_name,
                 Item={
