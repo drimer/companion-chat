@@ -15,18 +15,18 @@ The goal is to:
 
 ### 1. Update Database Schema and Models
 
-- [ ] **Update `Conversation` model in `src/companionchat/db/models.py`**
-  - [ ] Remove `messages` field
-  - [ ] Add `system_prompt: str` field
-  - [ ] Add `user_id: str` field
-  - [ ] Add `created_at: datetime` field for better tracking
+- [x] **Update `Conversation` model in `src/companionchat/db/models.py`**
+  - [x] Remove `messages` field
+  - [x] Add `system_prompt: str` field
+  - [x] Add `user_id: str` field
+  - [x] Add `created_at: datetime` field for better tracking
 
-- [ ] **Update Pydantic schemas in `src/companionchat/schemas/conversations.py`**
-  - [ ] Create `ConversationCreateRequest` schema
-  - [ ] Update `ConversationResponse` to include `system_prompt`, `user_id`, remove `messages`
-  - [ ] Create `ChatRequest` schema for incoming chat messages with full conversation history
-  - [ ] Create `ChatResponse` schema for OpenAI responses
-  - [ ] Create `MessageHistory` schema for client-side message storage
+- [x] **Update Pydantic schemas in `src/companionchat/schemas/conversations.py`**
+  - [x] Create `ConversationCreateRequest` schema
+  - [x] Update `ConversationResponse` to include `system_prompt`, `user_id`, remove `messages`
+  - [x] Create `ChatRequest` schema for incoming chat messages with full conversation history
+  - [x] Create `ChatResponse` schema for OpenAI responses
+  - [x] Create `MessageHistory` schema for client-side message storage
 
 ### 2. Update Repository Layer
 

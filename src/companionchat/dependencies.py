@@ -7,6 +7,7 @@ from fastapi import Depends, Request
 from types_aiobotocore_dynamodb import DynamoDBClient
 
 from src.companionchat.db.repositories import ConversationRepository
+from src.companionchat.services.openai_service import OpenAIService
 from src.companionchat.settings import get_settings
 
 DbContextDependency = Callable[..., AsyncGenerator[Any, None]]
@@ -65,3 +66,12 @@ def get_conversation_repository(
 ConversationRepositoryDep = Annotated[
     ConversationRepository, Depends(get_conversation_repository)
 ]
+
+
+@lru_cache
+def get_openai_service() -> OpenAIService:
+    """Get the OpenAI service instance."""
+    return OpenAIService(get_settings())
+
+
+OpenAIServiceDep = Annotated[OpenAIService, Depends(get_openai_service)]

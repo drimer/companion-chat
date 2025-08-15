@@ -1,14 +1,14 @@
 from typing import Annotated
 
-from fastapi import Body, FastAPI
+from fastapi import Body, FastAPI, HTTPException
 from mangum import Mangum
 
-from src.companionchat.dependencies import ConversationRepositoryDep
+from src.companionchat.dependencies import ConversationRepositoryDep, OpenAIServiceDep
 from src.companionchat.schemas.conversations import (
-    BaseConversation,
-    BaseMessage,
+    ConversationCreateRequest,
     ConversationResponse,
-    MessageResponse,
+    ChatRequest,
+    ChatResponse,
 )
 
 app = FastAPI(
@@ -18,18 +18,24 @@ app = FastAPI(
 )
 
 
-@app.post("/conversations", response_model=BaseConversation, status_code=201)
+@app.post("/conversations", response_model=ConversationResponse, status_code=201)
 async def create_conversation(
     conversation_repository: ConversationRepositoryDep,
 ) -> ConversationResponse:
     """
     Creates a new conversation and returns it.
 
-    For now, this endpoint returns a hardcoded conversation with an empty
-    message list. The ID is a fixed UUID to match the model's type.
+    Creates a conversation with hardcoded system prompt and user ID.
+    The conversation metadata (ID, system prompt, user ID, created_at) is stored,
+    but no messages are stored in the database.
     """
     conversation = await conversation_repository.create()
-    return ConversationResponse(id=conversation.id, messages=[])
+    return ConversationResponse(
+        id=conversation.id,
+        system_prompt=conversation.system_prompt,
+        user_id=conversation.user_id,
+        created_at=conversation.created_at,
+    )
 
 
 @app.get("/conversations/{conversation_id}")
@@ -40,55 +46,53 @@ async def get_conversation(
     """
     Retrieves a conversation by its ID.
 
-    This endpoint fetches the conversation identified by `conversation_id`
+    This endpoint fetches the conversation metadata identified by `conversation_id`
     and returns it. If the conversation does not exist, an error will be raised.
+    Note: This only returns metadata, not conversation messages.
     """
-    conversation = await conversation_repository.get(conversation_id)
+    try:
+        conversation = await conversation_repository.get(conversation_id)
+        return ConversationResponse(
+            id=conversation.id,
+            system_prompt=conversation.system_prompt,
+            user_id=conversation.user_id,
+            created_at=conversation.created_at,
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
 
-    return ConversationResponse(
-        id=conversation.id,
-        messages=[
-            MessageResponse(role=msg.role, content=msg.content)
-            for msg in conversation.messages
-        ],
-    )
 
-
-@app.post("/conversations/{conversation_id}/messages", status_code=201)
-async def store_new_message(
+@app.post("/conversations/{conversation_id}/chat")
+async def chat_with_conversation(
     conversation_id: str,
-    message: Annotated[BaseMessage, Body(description="The message content to store.")],
+    chat_request: ChatRequest,
     conversation_repository: ConversationRepositoryDep,
-) -> None:
+    openai_service: OpenAIServiceDep,
+) -> ChatResponse:
     """
-    Stores a new message in the specified conversation.
-
-    This endpoint adds a new message to the conversation identified by
-    `conversation_id`. The message is expected to be a string.
+    Process a chat request with the full conversation history.
+    
+    This endpoint accepts the complete conversation history from the client
+    and sends it to OpenAI for processing. Returns the AI assistant's response.
     """
-    print("Storing new message:", message)
-    await conversation_repository.store_new_message(conversation_id, message.content)
-
-
-@app.get("/conversations/{conversation_id}/messages", status_code=200)
-async def get_conversation_messages(
-    conversation_id: str,
-    conversation_repository: ConversationRepositoryDep,
-) -> list[MessageResponse]:
-    """
-    Retrieves all messages from a conversation by its ID.
-
-    This endpoint fetches all messages associated with the conversation
-    identified by `conversation_id` and returns them. If the conversation
-    does not exist, an error will be raised.
-    """
-    conversation = await conversation_repository.get(conversation_id)
-    if not conversation:
-        raise ValueError(f"Conversation with ID {conversation_id} not found.")
-    return [
-        MessageResponse(role=msg.role, content=msg.content)
-        for msg in conversation.messages
-    ]
+    try:
+        # Verify conversation exists and get system prompt
+        conversation = await conversation_repository.get(conversation_id)
+        
+        # Process chat request with OpenAI
+        response = await openai_service.process_chat_request(
+            system_prompt=conversation.system_prompt,
+            chat_request=chat_request
+        )
+        
+        return response
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
 
 
 # Create the handler that AWS Lambda will invoke

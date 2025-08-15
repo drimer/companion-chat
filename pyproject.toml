@@ -29,6 +29,10 @@ boto3 = "^1.37.2"
 aioboto3 = "^15.0.0"
 aiobotocore = "^2.23.0"
 types-aiobotocore = {extras = ["dynamodb"], version = "^2.23.0"}
+openai = "^1.55.0"
+langchain = "^0.3.7"
+langchain-openai = "^0.2.8"
+pydantic-settings = "^2.6.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
