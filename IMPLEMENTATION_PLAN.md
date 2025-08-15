@@ -30,12 +30,12 @@ The goal is to:
 
 ### 2. Update Repository Layer
 
-- [ ] **Modify `src/companionchat/db/repositories.py`**
-  - [ ] Update `create()` method to store system prompt and user ID
-  - [ ] Remove `store_new_message()` method
-  - [ ] Update `get()` method to return new conversation structure
-  - [ ] Add hardcoded system prompt constant: *"You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak."*
-  - [ ] Add hardcoded user ID constant (temporary)
+- [x] **Modify `src/companionchat/db/repositories.py`**
+  - [x] Update `create()` method to store system prompt and user ID
+  - [x] Remove `store_new_message()` method
+  - [x] Update `get()` method to return new conversation structure
+  - [x] Add hardcoded system prompt constant: *"You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak."*
+  - [x] Add hardcoded user ID constant (temporary)
 
 - [ ] **Update DynamoDB table structure**
   - [ ] Modify `infra/aws/modules/db/main.tf` if needed
@@ -43,43 +43,43 @@ The goal is to:
 
 ### 3. Add OpenAI Integration
 
-- [ ] **Install dependencies**
-  - [ ] Add `openai` to `pyproject.toml`
-  - [ ] Add `langchain` and `langchain-openai` for state-of-the-art LLM integration
-  - [ ] Add `pydantic-settings` for OpenAI API key management
+- [x] **Install dependencies**
+  - [x] Add `openai` to `pyproject.toml`
+  - [x] Add `langchain` and `langchain-openai` for state-of-the-art LLM integration
+  - [x] Add `pydantic-settings` for OpenAI API key management
 
-- [ ] **Update settings in `src/companionchat/settings.py`**
-  - [ ] Add `OPENAI_API_KEY: str` field
-  - [ ] Add `OPENAI_MODEL: str` field with default "gpt-4o-mini"
-  - [ ] Add `MAX_TOKENS: int` field with default 1000
+- [x] **Update settings in `src/companionchat/settings.py`**
+  - [x] Add `OPENAI_API_KEY: str` field
+  - [x] Add `OPENAI_MODEL: str` field with default "gpt-4o-mini"
+  - [x] Add `MAX_TOKENS: int` field with default 1000
 
-- [ ] **Create OpenAI service**
-  - [ ] Create `src/companionchat/services/` directory
-  - [ ] Create `src/companionchat/services/__init__.py`
-  - [ ] Create `src/companionchat/services/openai_service.py`
-    - [ ] Implement `OpenAIService` class using langchain
-    - [ ] Add method to process conversation with OpenAI
-    - [ ] Add proper error handling and logging
-    - [ ] Add token usage tracking
+- [x] **Create OpenAI service**
+  - [x] Create `src/companionchat/services/` directory
+  - [x] Create `src/companionchat/services/__init__.py`
+  - [x] Create `src/companionchat/services/openai_service.py`
+    - [x] Implement `OpenAIService` class using langchain
+    - [x] Add method to process conversation with OpenAI
+    - [x] Add proper error handling and logging
+    - [x] Add token usage tracking
 
-- [ ] **Update dependencies in `src/companionchat/dependencies.py`**
-  - [ ] Add `OpenAIService` dependency
-  - [ ] Create `get_openai_service()` function
+- [x] **Update dependencies in `src/companionchat/dependencies.py`**
+  - [x] Add `OpenAIService` dependency
+  - [x] Create `get_openai_service()` function
 
 ### 4. Update API Endpoints
 
-- [ ] **Modify `src/companionchat/main.py`**
-  - [ ] Update `create_conversation` endpoint
-    - [ ] Remove messages from response
-    - [ ] Store system prompt and user ID
-  - [ ] Update `get_conversation` endpoint
-    - [ ] Return conversation metadata only (no messages)
-  - [ ] Remove `store_new_message` endpoint
-  - [ ] Remove `get_conversation_messages` endpoint
-  - [ ] Add new `POST /conversations/{conversation_id}/chat` endpoint
-    - [ ] Accept full conversation history from client
-    - [ ] Send to OpenAI via service
-    - [ ] Return AI response only
+- [x] **Modify `src/companionchat/main.py`**
+  - [x] Update `create_conversation` endpoint
+    - [x] Remove messages from response
+    - [x] Store system prompt and user ID
+  - [x] Update `get_conversation` endpoint
+    - [x] Return conversation metadata only (no messages)
+  - [x] Remove `store_new_message` endpoint
+  - [x] Remove `get_conversation_messages` endpoint
+  - [x] Add new `POST /conversations/{conversation_id}/chat` endpoint
+    - [x] Accept full conversation history from client
+    - [x] Send to OpenAI via service
+    - [x] Return AI response only
 
 ### 5. Environment Configuration
 

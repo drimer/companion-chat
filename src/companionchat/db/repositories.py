@@ -54,5 +54,8 @@ class ConversationRepository:
                 user_id=item["user_id"]["S"],
                 created_at=datetime.fromisoformat(item["created_at"]["S"]),
             )
+        except ValueError:
+            # Re-raise ValueError for not found cases
+            raise
         except Exception as e:
             raise Exception(f"Error retrieving conversation: {e}")

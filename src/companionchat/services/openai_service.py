@@ -5,7 +5,6 @@ from langchain_openai import ChatOpenAI
 from langchain.schema import BaseMessage, HumanMessage, AIMessage, SystemMessage
 
 from src.companionchat.schemas.conversations import ChatRequest, ChatResponse, MessageHistory
-from src.companionchat.settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -13,14 +12,8 @@ logger = logging.getLogger(__name__)
 class OpenAIService:
     """Service for handling OpenAI chat completions using Langchain."""
     
-    def __init__(self, settings: Settings):
-        self.settings = settings
-        self.client = ChatOpenAI(
-            openai_api_key=settings.OPENAI_API_KEY,
-            model=settings.OPENAI_MODEL,
-            max_tokens=settings.MAX_TOKENS,
-            temperature=0.7,
-        )
+    def __init__(self, client: ChatOpenAI):
+        self.client = client
     
     def _convert_messages_to_langchain(self, system_prompt: str, messages: List[MessageHistory]) -> List[BaseMessage]:
         """Convert our message format to Langchain message format."""

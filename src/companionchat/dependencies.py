@@ -5,6 +5,7 @@ import aioboto3
 from botocore.config import Config
 from fastapi import Depends, Request
 from types_aiobotocore_dynamodb import DynamoDBClient
+from langchain_openai import ChatOpenAI
 
 from src.companionchat.db.repositories import ConversationRepository
 from src.companionchat.services.openai_service import OpenAIService
@@ -69,9 +70,21 @@ ConversationRepositoryDep = Annotated[
 
 
 @lru_cache
-def get_openai_service() -> OpenAIService:
+def get_openai_client() -> ChatOpenAI:
+    """Get the ChatOpenAI client instance."""
+    settings = get_settings()
+    return ChatOpenAI(
+        openai_api_key=settings.OPENAI_API_KEY,
+        model=settings.OPENAI_MODEL,
+        max_tokens=settings.MAX_TOKENS,
+        temperature=0.7,
+    )
+
+
+@lru_cache
+def get_openai_service(client: ChatOpenAI = Depends(get_openai_client)) -> OpenAIService:
     """Get the OpenAI service instance."""
-    return OpenAIService(get_settings())
+    return OpenAIService(client)
 
 
 OpenAIServiceDep = Annotated[OpenAIService, Depends(get_openai_service)]
