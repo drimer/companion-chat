@@ -73,8 +73,6 @@ ConversationRepositoryDep = Annotated[
 def get_openai_client() -> ChatOpenAI:
     """Get the ChatOpenAI client instance."""
     settings = get_settings()
-    if not settings.OPENAI_API_KEY:
-        raise ValueError("OPENAI_API_KEY is not set in environment variables")
     return ChatOpenAI(
         openai_api_key=settings.OPENAI_API_KEY,
         model=settings.OPENAI_MODEL,

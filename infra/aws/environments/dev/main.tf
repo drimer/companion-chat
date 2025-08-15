@@ -51,4 +51,6 @@ module "conversations_lambda" {
     lambda_function_runtime = "python3.10"
     db_conversations_table_arn = module.db.conversations_table_arn
     db_conversations_table_name = module.db.conversations_table_name
+    openai_model = "gpt-4o-mini"
+    max_tokens = "1000"
 }

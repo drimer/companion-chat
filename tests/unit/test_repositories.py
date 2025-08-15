@@ -49,7 +49,7 @@ async def test_create_conversation(repository, mock_dynamodb_client):
 @pytest.mark.asyncio
 async def test_get_conversation_success(repository, mock_dynamodb_client):
     """Test successfully retrieving a conversation."""
-    conversation_id = "test-conversation-id"
+    conversation_id = "550e8400-e29b-41d4-a716-446655440000"  # Valid UUID string
     created_at = datetime.now(timezone.utc)
 
     mock_dynamodb_client.get_item.return_value = {
@@ -63,7 +63,8 @@ async def test_get_conversation_success(repository, mock_dynamodb_client):
 
     conversation = await repository.get(conversation_id)
 
-    assert conversation.id == conversation_id
+    # The returned conversation should have UUID type for id
+    assert str(conversation.id) == conversation_id
     assert conversation.system_prompt == DEFAULT_SYSTEM_PROMPT
     assert conversation.user_id == DEFAULT_USER_ID
     assert conversation.created_at == created_at
@@ -80,10 +81,9 @@ async def test_get_conversation_not_found(repository, mock_dynamodb_client):
     conversation_id = "non-existent-id"
     mock_dynamodb_client.get_item.return_value = {}
 
-    with pytest.raises(
-        ValueError, match=f"Conversation with ID {conversation_id} not found"
-    ):
-        await repository.get(conversation_id)
+    # Now expects None to be returned instead of raising ValueError
+    result = await repository.get(conversation_id)
+    assert result is None
 
 
 @pytest.mark.asyncio

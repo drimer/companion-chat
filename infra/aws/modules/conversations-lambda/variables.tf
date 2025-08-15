@@ -37,3 +37,15 @@ variable "db_conversations_table_name" {
     type = string
     description = "The name for the DynamoDB conversations table"
 }
+
+variable "openai_model" {
+    type = string
+    description = "The OpenAI model to use for chat completion"
+    default = "gpt-4o-mini"
+}
+
+variable "max_tokens" {
+    type = string
+    description = "Maximum tokens for OpenAI responses"
+    default = "1000"
+}

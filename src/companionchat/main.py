@@ -1,3 +1,5 @@
+from typing import Dict
+
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 
@@ -91,5 +93,13 @@ async def chat_with_conversation(
         raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
 
 
+@app.get("/health")
+async def health_check() -> Dict[str, str]:
+    """Health check endpoint."""
+    return {"status": "healthy"}
+
+
 # Create the handler that AWS Lambda will invoke
+handler = Mangum(app, lifespan="off")
+handler = Mangum(app, lifespan="off")
 handler = Mangum(app, lifespan="off")

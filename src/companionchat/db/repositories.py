@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
-from uuid import uuid4
+from typing import Optional, Union
+from uuid import UUID, uuid4
 
 from types_aiobotocore_dynamodb import DynamoDBClient
 
@@ -38,24 +39,24 @@ class ConversationRepository:
         except Exception as e:
             raise Exception(f"Error creating conversation: {e}")
 
-    async def get(self, conversation_id: str) -> Conversation:
+    async def get(self, conversation_id: Union[str, UUID]) -> Optional[Conversation]:
         try:
+            # Convert UUID to string if necessary
+            id_str = str(conversation_id)
+
             response = await self.client.get_item(
                 TableName=self.table_name,
-                Key={"id": {"S": conversation_id}},
+                Key={"id": {"S": id_str}},
             )
             item = response.get("Item")
             if not item:
-                raise ValueError(f"Conversation with ID {conversation_id} not found.")
+                return None  # Return None instead of raising ValueError
 
             return Conversation(
-                id=item["id"]["S"],
+                id=UUID(item["id"]["S"]),  # Convert string back to UUID
                 system_prompt=item["system_prompt"]["S"],
                 user_id=item["user_id"]["S"],
                 created_at=datetime.fromisoformat(item["created_at"]["S"]),
             )
-        except ValueError:
-            # Re-raise ValueError for not found cases
-            raise
         except Exception as e:
             raise Exception(f"Error retrieving conversation: {e}")

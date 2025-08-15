@@ -65,3 +65,7 @@ minversion = "7.0"
 addopts = "-ra -q --asyncio-mode=auto"
 testpaths = ["tests"]
 asyncio_mode = "auto"
+markers = [
+    "e2e: marks tests as end-to-end tests",
+    "integration: marks tests as integration tests",
+]

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List
+from typing import Dict, List
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -79,4 +79,6 @@ class ChatResponse(BaseModel):
     """
 
     message: str = Field(..., description="The AI assistant's response message.")
-    usage: dict = Field(default_factory=dict, description="Token usage information.")
+    usage: Dict[str, int] = Field(
+        default_factory=dict, description="Token usage information."
+    )
