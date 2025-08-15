@@ -1,12 +1,36 @@
-# Example curl commands for testing the API through API Gateway
+#!/bin/bash
+# Bash script for testing the API through API Gateway
+# Usage: bash test-events/api-gateway-examples.sh
+
+set -e  # Exit on any error
+
+echo "🚀 Testing Companion Chat API via API Gateway"
+echo "================================================"
+
+# Base URL
+BASE_URL="https://uycxfk6mv4.execute-api.eu-west-2.amazonaws.com/dev"
 
 # 1. Create a new conversation
-curl -X POST https://your-api-gateway-url/conversations \
+echo ""
+echo "📝 Creating a new conversation..."
+response=$(curl -s -X POST "$BASE_URL/conversations" \
   -H "Content-Type: application/json" \
-  -d '{}'
+  -d '{}')
 
-# 2. Send a chat message (replace {conversation-id} with actual ID)
-curl -X POST https://your-api-gateway-url/conversations/{conversation-id}/chat \
+if [ $? -eq 0 ]; then
+    echo "✅ Conversation created successfully!"
+    conversation_id=$(echo $response | grep -o '"id":"[^"]*"' | cut -d'"' -f4)
+    echo "   ID: $conversation_id"
+    echo "   Response: $response"
+else
+    echo "❌ Failed to create conversation"
+    exit 1
+fi
+
+# 2. Send a chat message
+echo ""
+echo "💬 Sending a chat message..."
+chat_response=$(curl -s -X POST "$BASE_URL/conversations/$conversation_id/chat" \
   -H "Content-Type: application/json" \
   -d '{
     "messages": [
@@ -31,4 +55,15 @@ curl -X POST https://your-api-gateway-url/conversations/{conversation-id}/chat \
         "content": "はい、元気です。好きな色は何ですか？"
       }
     ]
-  }'
+  }')
+
+if [ $? -eq 0 ]; then
+    echo "✅ Chat message sent successfully!"
+    echo "   AI Response: $chat_response"
+else
+    echo "❌ Failed to send chat message"
+    echo "   💡 Tip: Check if OpenAI API key is configured in Lambda environment variables"
+fi
+
+echo ""
+echo "🎉 API testing completed!"

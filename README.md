@@ -174,7 +174,8 @@ poetry run pytest -v
            "dynamodb:*",
            "lambda:*",
            "iam:*",
-           "logs:*"
+           "logs:*",
+		   "apigateway:*"
          ],
          "Resource": "*"
        }
