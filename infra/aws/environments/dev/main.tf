@@ -54,3 +54,12 @@ module "conversations_lambda" {
     openai_model = "gpt-4o-mini"
     max_tokens = "1000"
 }
+
+module "api_gateway" {
+    source = "../../modules/api-gateway"
+    group = local.group_global
+    environment = local.environment
+    scope = "chat"
+    lambda_function_arn = module.conversations_lambda.lambda_function_arn
+    lambda_function_name = module.conversations_lambda.lambda_function_name
+}

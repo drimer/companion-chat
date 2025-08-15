@@ -27,3 +27,13 @@ output "lambda_deployments_bucket_arn" {
   description = "ARN of the S3 bucket used for Lambda deployment packages"
   value       = module.conversations_lambda.lambda_deployments_bucket_arn
 }
+
+output "api_gateway_url" {
+  description = "URL of the API Gateway"
+  value       = module.api_gateway.api_gateway_url
+}
+
+output "api_gateway_id" {
+  description = "ID of the API Gateway"
+  value       = module.api_gateway.api_gateway_id
+}
