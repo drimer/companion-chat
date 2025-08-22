@@ -3,7 +3,7 @@ name: Deployment pipeline
 on:
   push:
     branches:
-      - api-gateway
+      - main
 
 permissions:
   contents: read # for actions/checkout
