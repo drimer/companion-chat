@@ -1,6 +1,8 @@
+import logging
 import os
 from functools import lru_cache
 
+from fastapi import logger
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -31,3 +33,13 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def configure_logging():
+    stream_handler = logging.StreamHandler()
+    log_formatter = logging.Formatter(
+        "%(asctime)s [%(processName)s: %(process)d] [%(threadName)s: %(thread)d] [%(levelname)s] %(name)s: %(message)s"
+    )
+    stream_handler.setFormatter(log_formatter)
+    logger.logger.addHandler(stream_handler)
+    logger.logger.setLevel("INFO")

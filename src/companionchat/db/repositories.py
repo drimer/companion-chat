@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import Optional, Union
 from uuid import UUID, uuid4
 
+from fastapi import logger
 from types_aiobotocore_dynamodb import DynamoDBClient
 
 from src.companionchat.db.models import Conversation
@@ -39,6 +40,10 @@ class ConversationRepository:
                     "user_id": {"S": DEFAULT_USER_ID},
                     "created_at": {"S": created_at.isoformat()},
                 },
+            )
+
+            logger.logger.info(
+                f"Created conversation with ID: {conversation_id} and default prompt"
             )
             return Conversation(
                 id=conversation_id,

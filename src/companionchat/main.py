@@ -1,8 +1,9 @@
 from typing import Dict
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, logger
 from mangum import Mangum
 
+from companionchat.settings import configure_logging
 from src.companionchat.dependencies import ConversationRepositoryDep, OpenAIServiceDep
 from src.companionchat.schemas.conversations import (
     ChatRequest,
@@ -15,6 +16,8 @@ app = FastAPI(
     description="API for managing conversations with your companion.",
     version="0.1.0",
 )
+
+configure_logging()
 
 
 @app.post("/conversations", response_model=ConversationResponse, status_code=201)
@@ -29,6 +32,8 @@ async def create_conversation(
     but no messages are stored in the database.
     """
     conversation = await conversation_repository.create()
+
+    logger.logger.info(f"Created a new conversation with ID: {conversation.id}")
     return ConversationResponse(
         id=conversation.id,
         system_prompt=conversation.system_prompt,
@@ -49,6 +54,8 @@ async def get_conversation(
     and returns it. If the conversation does not exist, an error will be raised.
     Note: This only returns metadata, not conversation messages.
     """
+    logger.logger.info(f"Retrieving conversation with ID: {conversation_id}")
+
     try:
         conversation = await conversation_repository.get(conversation_id)
         return ConversationResponse(
@@ -76,6 +83,8 @@ async def chat_with_conversation(
     This endpoint accepts the complete conversation history from the client
     and sends it to OpenAI for processing. Returns the AI assistant's response.
     """
+    logger.logger.info(f"New message in conversation ID: {conversation_id}")
+
     try:
         # Verify conversation exists and get system prompt
         conversation = await conversation_repository.get(conversation_id)
