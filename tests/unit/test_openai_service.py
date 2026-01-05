@@ -2,7 +2,11 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.companionchat.schemas.conversations import ChatRequest, MessageHistory
+from src.companionchat.schemas.conversations import (
+    ChatRequest,
+    MessageHistory,
+    MessageResponse,
+)
 from src.companionchat.services.openai_service import OpenAIService
 
 
@@ -39,6 +43,30 @@ def test_convert_messages_to_langchain(openai_service):
 
 
 @pytest.mark.asyncio
+async def test_generate_initial_message_success(openai_service, mock_client):
+    """Ensure the initial assistant message is generated when the model responds."""
+    mock_response = MagicMock()
+    mock_response.content = "こんにちは！今日は素敵な日ですね。"
+    mock_client.ainvoke.return_value = mock_response
+
+    result = await openai_service.generate_initial_message("Test system prompt")
+
+    assert isinstance(result, MessageResponse)
+    assert result.role == "assistant"
+    assert result.content == "こんにちは！今日は素敵な日ですね。"
+    mock_client.ainvoke.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_generate_initial_message_failure(openai_service, mock_client):
+    """Raise a descriptive error if the OpenAI call fails."""
+    mock_client.ainvoke.side_effect = Exception("API unavailable")
+
+    with pytest.raises(Exception, match="Failed to generate initial assistant message"):
+        await openai_service.generate_initial_message("Test system prompt")
+
+
+@pytest.mark.asyncio
 async def test_process_chat_request_success(openai_service, mock_client):
     """Test successful chat request processing."""
     mock_response = MagicMock()
@@ -59,7 +87,7 @@ async def test_process_chat_request_success(openai_service, mock_client):
     assert response.usage["prompt_tokens"] == 10
     assert response.usage["completion_tokens"] == 8
     assert response.usage["total_tokens"] == 18
-    mock_client.ainvoke.assert_called_once()
+    mock_client.ainvoke.assert_awaited_once()
 
 
 @pytest.mark.asyncio

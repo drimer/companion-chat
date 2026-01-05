@@ -8,6 +8,7 @@ from src.companionchat.schemas.conversations import (
     ConversationCreateRequest,
     ConversationResponse,
     MessageHistory,
+    MessageResponse,
 )
 
 
@@ -27,12 +28,15 @@ def test_conversation_response():
         system_prompt="Test system prompt",
         user_id="test-user",
         created_at=created_at,
+        messages=[MessageResponse(role="assistant", content="Hello there!")],
     )
 
     assert response.id == conversation_id
     assert response.system_prompt == "Test system prompt"
     assert response.user_id == "test-user"
     assert response.created_at == created_at
+    assert response.messages[0].role == "assistant"
+    assert response.messages[0].content == "Hello there!"
 
 
 def test_message_history():
