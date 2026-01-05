@@ -34,9 +34,9 @@ def mock_openai_service():
 async def async_client(mock_conversation_repository, mock_openai_service):
     """Create an async HTTP client for testing with mocked dependencies."""
     # Override dependencies
-    app.dependency_overrides[
-        get_conversation_repository
-    ] = lambda: mock_conversation_repository
+    app.dependency_overrides[get_conversation_repository] = (
+        lambda: mock_conversation_repository
+    )
     app.dependency_overrides[get_openai_service] = lambda: mock_openai_service
 
     async with AsyncClient(
