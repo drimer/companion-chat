@@ -23,6 +23,7 @@ configure_logging()
 @app.post("/conversations", response_model=ConversationResponse, status_code=201)
 async def create_conversation(
     conversation_repository: ConversationRepositoryDep,
+    openai_service: OpenAIServiceDep,
 ) -> ConversationResponse:
     """
     Creates a new conversation and returns it.
@@ -34,11 +35,26 @@ async def create_conversation(
     conversation = await conversation_repository.create()
 
     logger.logger.info(f"Created a new conversation with ID: {conversation.id}")
+
+    try:
+        initial_message = await openai_service.generate_initial_message(
+            conversation.system_prompt
+        )
+    except Exception:
+        logger.logger.exception(
+            f"Failed generating initial message for conversation {conversation.id}"
+        )
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate initial assistant message.",
+        )
+
     return ConversationResponse(
         id=conversation.id,
         system_prompt=conversation.system_prompt,
         user_id=conversation.user_id,
         created_at=conversation.created_at,
+        messages=[initial_message],
     )
 
 
@@ -63,6 +79,7 @@ async def get_conversation(
             system_prompt=conversation.system_prompt,
             user_id=conversation.user_id,
             created_at=conversation.created_at,
+            messages=[],
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

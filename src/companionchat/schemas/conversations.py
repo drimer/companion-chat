@@ -61,6 +61,10 @@ class ConversationResponse(BaseConversation):
         ..., description="The ID of the user who owns the conversation."
     )
     created_at: datetime = Field(..., description="When the conversation was created.")
+    messages: List[MessageResponse] = Field(
+        default_factory=list,
+        description="Initial messages associated with the conversation.",
+    )
 
 
 class ChatRequest(BaseModel):

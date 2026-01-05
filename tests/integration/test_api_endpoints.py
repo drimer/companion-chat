@@ -15,7 +15,7 @@ from src.companionchat.dependencies import (
     get_openai_service,
 )
 from src.companionchat.main import app
-from src.companionchat.schemas.conversations import ChatResponse
+from src.companionchat.schemas.conversations import ChatResponse, MessageResponse
 
 
 @pytest.fixture
@@ -52,7 +52,7 @@ class TestConversationEndpoints:
     """Test conversation CRUD endpoints."""
 
     async def test_create_conversation(
-        self, async_client, mock_conversation_repository
+        self, async_client, mock_conversation_repository, mock_openai_service
     ):
         """Test conversation creation endpoint."""
         # Arrange
@@ -64,6 +64,10 @@ class TestConversationEndpoints:
         mock_conversation.created_at = datetime.now()
 
         mock_conversation_repository.create.return_value = mock_conversation
+        mock_openai_service.generate_initial_message.return_value = MessageResponse(
+            role="assistant",
+            content="こんにちは！今日は素敵なレストランでお会いしましょう。",
+        )
 
         # Act
         response = await async_client.post("/conversations")
@@ -75,8 +79,17 @@ class TestConversationEndpoints:
         assert data["system_prompt"] == mock_conversation.system_prompt
         assert data["user_id"] == mock_conversation.user_id
         assert "created_at" in data
+        assert data["messages"] == [
+            {
+                "role": "assistant",
+                "content": "こんにちは！今日は素敵なレストランでお会いしましょう。",
+            }
+        ]
 
         mock_conversation_repository.create.assert_called_once()
+        mock_openai_service.generate_initial_message.assert_awaited_once_with(
+            mock_conversation.system_prompt
+        )
 
     async def test_get_conversation(self, async_client, mock_conversation_repository):
         """Test conversation retrieval endpoint."""
@@ -100,6 +113,7 @@ class TestConversationEndpoints:
         assert "system_prompt" in data
         assert "user_id" in data
         assert "created_at" in data
+        assert data["messages"] == []
 
         mock_conversation_repository.get.assert_called_once_with(conversation_id)
 
@@ -178,7 +192,7 @@ class TestChatEndpoint:
 
         # Verify service calls
         mock_conversation_repository.get.assert_called_once_with(conversation_id)
-        mock_openai_service.process_chat_request.assert_called_once()
+        mock_openai_service.process_chat_request.assert_awaited_once()
 
     async def test_chat_with_nonexistent_conversation(
         self, async_client, mock_conversation_repository, mock_openai_service

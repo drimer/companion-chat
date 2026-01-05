@@ -8,6 +8,7 @@ from src.companionchat.schemas.conversations import (
     ChatRequest,
     ChatResponse,
     MessageHistory,
+    MessageResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -34,6 +35,30 @@ class OpenAIService:
                 logger.warning(f"Unknown message role: {message.role}")
 
         return langchain_messages
+
+    async def generate_initial_message(self, system_prompt: str) -> MessageResponse:
+        """Generate the first assistant message for a newly created conversation."""
+        try:
+            logger.info("Generating initial assistant message for new conversation")
+
+            response = await self.client.ainvoke(
+                [
+                    SystemMessage(content=system_prompt),
+                    HumanMessage(
+                        content=(
+                            "Initiate the scenario described in the system prompt and "
+                            "greet me naturally in Japanese before providing guidance."
+                        )
+                    ),
+                ]
+            )
+
+            logger.info("Initial assistant message generated successfully")
+            return MessageResponse(role="assistant", content=response.content)
+
+        except Exception as exc:  # pragma: no cover - ensures consistent error surface
+            logger.error(f"Error generating initial assistant message: {exc}")
+            raise Exception(f"Failed to generate initial assistant message: {exc}")
 
     async def process_chat_request(
         self, system_prompt: str, chat_request: ChatRequest
@@ -66,14 +91,6 @@ class OpenAIService:
 
             return ChatResponse(message=response.content, usage=usage_info)
 
-        except Exception as e:
-            logger.error(f"Error processing chat request: {e}")
-            raise Exception(f"Failed to process chat request: {e}")
-
-        except Exception as e:
-            logger.error(f"Error processing chat request: {e}")
-            raise Exception(f"Failed to process chat request: {e}")
-
-        except Exception as e:
-            logger.error(f"Error processing chat request: {e}")
-            raise Exception(f"Failed to process chat request: {e}")
+        except Exception as exc:  # pragma: no cover - ensures consistent error surface
+            logger.error(f"Error processing chat request: {exc}")
+            raise Exception(f"Failed to process chat request: {exc}")
