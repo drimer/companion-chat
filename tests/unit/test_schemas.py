@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import uuid4
 
-from src.companionchat.schemas.conversations import (
+from companionchat.schemas.conversations import (
     ChatRequest,
     ChatResponse,
     ConversationCreateRequest,

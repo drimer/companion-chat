@@ -7,9 +7,9 @@ from fastapi import Depends, Request
 from langchain_openai import ChatOpenAI
 from types_aiobotocore_dynamodb import DynamoDBClient
 
-from src.companionchat.db.repositories import ConversationRepository
-from src.companionchat.services.openai_service import OpenAIService
-from src.companionchat.settings import get_settings
+from companionchat.db.repositories import ConversationRepository
+from companionchat.services.openai_service import OpenAIService
+from companionchat.settings import get_settings
 
 DbContextDependency = Callable[..., AsyncGenerator[Any, None]]
 

@@ -54,6 +54,7 @@ class ConversationResponse(BaseConversation):
     This is used for API responses.
     """
 
+    id: UUID = Field(..., description="The unique identifier for the conversation.")
     system_prompt: str = Field(
         ..., description="The system prompt for the conversation."
     )

@@ -10,12 +10,9 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from src.companionchat.dependencies import (
-    get_conversation_repository,
-    get_openai_service,
-)
-from src.companionchat.main import app
-from src.companionchat.schemas.conversations import ChatResponse, MessageResponse
+from companionchat.dependencies import get_conversation_repository, get_openai_service
+from companionchat.main import app
+from companionchat.schemas.conversations import ChatResponse, MessageResponse
 
 
 @pytest.fixture

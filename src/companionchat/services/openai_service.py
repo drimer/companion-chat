@@ -4,7 +4,7 @@ from typing import List
 from langchain.schema import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 
-from src.companionchat.schemas.conversations import (
+from companionchat.schemas.conversations import (
     ChatRequest,
     ChatResponse,
     MessageHistory,

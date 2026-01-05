@@ -4,7 +4,7 @@ from uuid import UUID
 
 import pytest
 
-from src.companionchat.db.repositories import (
+from companionchat.db.repositories import (
     DEFAULT_SYSTEM_PROMPT,
     DEFAULT_USER_ID,
     ConversationRepository,
