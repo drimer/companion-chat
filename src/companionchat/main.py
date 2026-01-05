@@ -3,13 +3,13 @@ from typing import Dict
 from fastapi import FastAPI, HTTPException, logger
 from mangum import Mangum
 
-from companionchat.settings import configure_logging
-from src.companionchat.dependencies import ConversationRepositoryDep, OpenAIServiceDep
-from src.companionchat.schemas.conversations import (
+from companionchat.dependencies import ConversationRepositoryDep, OpenAIServiceDep
+from companionchat.schemas.conversations import (
     ChatRequest,
     ChatResponse,
     ConversationResponse,
 )
+from companionchat.settings import configure_logging
 
 app = FastAPI(
     title="Companion Chat API",
@@ -49,13 +49,19 @@ async def create_conversation(
             detail="Failed to generate initial assistant message.",
         )
 
-    return ConversationResponse(
+    logger.logger.info(f"initial_message type: {type(initial_message)}")
+    logger.logger.info(f"initial_message content: {initial_message.content}")
+    logger.logger.info(f"initial_message role: {initial_message.role}")
+
+    response = ConversationResponse(
         id=conversation.id,
         system_prompt=conversation.system_prompt,
         user_id=conversation.user_id,
         created_at=conversation.created_at,
         messages=[initial_message],
     )
+
+    return response
 
 
 @app.get("/conversations/{conversation_id}")

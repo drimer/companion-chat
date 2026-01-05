@@ -9,9 +9,9 @@ from datetime import datetime
 
 import pytest
 
-from src.companionchat.db.repositories import ConversationRepository
-from src.companionchat.dependencies import create_dynamodb_client_context
-from src.companionchat.settings import Settings
+from companionchat.db.repositories import ConversationRepository
+from companionchat.dependencies import create_dynamodb_client_context
+from companionchat.settings import Settings
 
 
 @pytest.fixture

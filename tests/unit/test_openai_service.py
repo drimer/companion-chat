@@ -2,12 +2,12 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from src.companionchat.schemas.conversations import (
+from companionchat.schemas.conversations import (
     ChatRequest,
     MessageHistory,
     MessageResponse,
 )
-from src.companionchat.services.openai_service import OpenAIService
+from companionchat.services.openai_service import OpenAIService
 
 
 @pytest.fixture

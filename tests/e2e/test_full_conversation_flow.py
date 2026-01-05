@@ -11,7 +11,7 @@ import uuid
 import pytest
 from httpx import AsyncClient
 
-from src.companionchat.main import app
+from companionchat.main import app
 
 
 @pytest.fixture

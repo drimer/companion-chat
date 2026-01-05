@@ -5,7 +5,7 @@ from uuid import UUID, uuid4
 from fastapi import logger
 from types_aiobotocore_dynamodb import DynamoDBClient
 
-from src.companionchat.db.models import Conversation
+from companionchat.db.models import Conversation
 
 # Hardcoded constants for now
 DEFAULT_SYSTEM_PROMPT = """
