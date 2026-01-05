@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fix-lambda-s3-link
 
 permissions:
   contents: read # for actions/checkout

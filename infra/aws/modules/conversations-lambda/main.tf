@@ -66,6 +66,7 @@ resource "aws_s3_object" "lambda_deployment_package" {
   key    = "deployment.zip"
   source = "${path.module}/../../../../deployment.zip"
   source_hash = filemd5("${path.module}/../../../../deployment.zip")
+  version_id = aws_s3_object.lambda_deployment_package.version_id
 }
 
 resource "aws_lambda_function" "conversations" {
