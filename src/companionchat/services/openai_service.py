@@ -94,3 +94,36 @@ class OpenAIService:
         except Exception as exc:  # pragma: no cover - ensures consistent error surface
             logger.error(f"Error processing chat request: {exc}")
             raise Exception(f"Failed to process chat request: {exc}")
+
+
+class MockOpenAIService:
+    """Mock implementation used when OpenAI calls should be skipped."""
+
+    async def generate_initial_message(self, system_prompt: str) -> MessageResponse:
+        logger.info("Returning mock initial assistant message")
+        return MessageResponse(
+            role="assistant",
+            content=("Mock mode active. No OpenAI request was sent."),
+        )
+
+    async def process_chat_request(
+        self, system_prompt: str, chat_request: ChatRequest
+    ) -> ChatResponse:
+        last_user_message = next(
+            (
+                msg.content
+                for msg in reversed(chat_request.messages)
+                if msg.role == "user"
+            ),
+            "",
+        )
+
+        logger.info("Returning mock chat response")
+        return ChatResponse(
+            message=(
+                "Mock mode reply. No OpenAI request was sent."
+                if not last_user_message
+                else f"Echoing your latest message: {last_user_message}"
+            ),
+            usage={"mock": True},
+        )
