@@ -8,7 +8,7 @@ from langchain_openai import ChatOpenAI
 from types_aiobotocore_dynamodb import DynamoDBClient
 
 from companionchat.db.repositories import ConversationRepository
-from companionchat.services.openai_service import OpenAIService
+from companionchat.services.openai_service import MockOpenAIService, OpenAIService
 from companionchat.settings import get_settings
 
 DbContextDependency = Callable[..., AsyncGenerator[Any, None]]
@@ -81,10 +81,14 @@ def get_openai_client() -> ChatOpenAI:
     )
 
 
-def get_openai_service(
-    client: ChatOpenAI = Depends(get_openai_client),
-) -> OpenAIService:
+def get_openai_service() -> OpenAIService:
     """Get the OpenAI service instance."""
+    settings = get_settings()
+
+    if settings.USE_MOCK_OPENAI:
+        return MockOpenAIService()
+
+    client = get_openai_client()
     return OpenAIService(client)
 
 

@@ -20,10 +20,16 @@ aws dynamodb create-table \
   --key-schema AttributeName=id,KeyType=HASH \
   --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
   --endpoint-url http://localhost:8000
-
-# 4. Start the server
-poetry run uvicorn src.companionchat.main:app --reload --port 4000
 ```
+
+4. Start the server
+
+- VS Code: Launch the companion-chat [FastAPI] configuration from Run and Debug (uses .env).
+- Terminal:
+
+  ```bash
+  poetry run uvicorn src.companionchat.main:app --reload --port 4000
+  ```
 
 ### Testing the Production API
 ```bash

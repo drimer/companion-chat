@@ -51,9 +51,12 @@ aws dynamodb create-table \
 ## Running the Application
 
 **Start the development server**:
-```bash
-poetry run uvicorn src.companionchat.main:app --reload --port 4000
-```
+
+- VS Code: Open **Run and Debug** and start the **companion-chat [FastAPI]** configuration (loads environment from `.env`).
+- Terminal: 
+  ```bash
+  poetry run uvicorn src.companionchat.main:app --reload --port 4000
+  ```
 
 The API will be available at:
 - **API**: http://localhost:4000

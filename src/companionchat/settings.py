@@ -14,6 +14,8 @@ class Settings(BaseSettings):
 
     DB_CONVERSATIONS_TABLE_NAME: str = ""
 
+    USE_MOCK_OPENAI: bool = False
+
     # OpenAI Configuration
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4o-mini"

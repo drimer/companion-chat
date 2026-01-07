@@ -3,3 +3,8 @@ variable "aws_region" {
     type = string
     default = "eu-west-2"
 }
+
+variable "openai_api_key" {
+    description = "The OpenAI API key for making API calls to OpenAI"
+    type = string
+}
