@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - parameterise-openai-key
 
 permissions:
   contents: read # for actions/checkout
