@@ -84,7 +84,7 @@ resource "aws_lambda_function" "conversations" {
   environment {
     variables = {
       DB_CONVERSATIONS_TABLE_NAME = var.db_conversations_table_name
-      OPENAI_API_KEY = "REPLACE_WITH_REAL_API_KEY_AFTER_DEPLOYMENT"
+      OPENAI_API_KEY = var.openai_api_key
       OPENAI_MODEL = var.openai_model
       MAX_TOKENS = var.max_tokens
     }

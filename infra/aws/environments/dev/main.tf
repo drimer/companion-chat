@@ -53,6 +53,7 @@ module "conversations_lambda" {
     db_conversations_table_name = module.db.conversations_table_name
     openai_model = "gpt-4o-mini"
     max_tokens = "1000"
+    openai_api_key = var.openai_api_key
 }
 
 module "api_gateway" {

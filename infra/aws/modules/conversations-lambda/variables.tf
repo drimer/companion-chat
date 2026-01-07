@@ -55,3 +55,8 @@ variable "deployment_package_key" {
     description = "S3 key for the Lambda deployment package"
     default = "deployment.zip"
 }
+
+variable "openai_api_key" {
+    type = string
+    description = "The OpenAI API key for making API calls to OpenAI"
+}
