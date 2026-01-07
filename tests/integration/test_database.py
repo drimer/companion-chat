@@ -30,6 +30,11 @@ def test_settings():
 
 
 @pytest.fixture
+def test_owner_sub() -> str:
+    return "integration-user-001"
+
+
+@pytest.fixture
 async def conversation_repository(test_settings):
     """Create a conversation repository for testing."""
     async with create_dynamodb_client_context() as client:
@@ -40,25 +45,25 @@ async def conversation_repository(test_settings):
 class TestConversationRepository:
     """Test conversation repository database operations."""
 
-    async def test_create_conversation(self, conversation_repository):
+    async def test_create_conversation(self, conversation_repository, test_owner_sub):
         """Test creating a conversation in the database."""
         # Act
-        conversation = await conversation_repository.create()
+        conversation = await conversation_repository.create(test_owner_sub)
 
         # Assert
         assert conversation is not None
         assert isinstance(conversation.id, uuid.UUID)  # Should be UUID, not string
         assert len(str(conversation.id)) == 36  # UUID string length
         assert len(conversation.system_prompt) > 0  # Default prompt is non-empty
-        assert (
-            conversation.user_id == "default-user-123"
-        )  # Updated to match repository constant
+        assert conversation.user_id == test_owner_sub
         assert isinstance(conversation.created_at, datetime)
 
-    async def test_get_existing_conversation(self, conversation_repository):
+    async def test_get_existing_conversation(
+        self, conversation_repository, test_owner_sub
+    ):
         """Test retrieving an existing conversation from the database."""
         # Arrange - create a conversation first
-        created_conversation = await conversation_repository.create()
+        created_conversation = await conversation_repository.create(test_owner_sub)
 
         # Act
         retrieved_conversation = await conversation_repository.get(
@@ -85,11 +90,13 @@ class TestConversationRepository:
         # Assert
         assert conversation is None
 
-    async def test_multiple_conversations(self, conversation_repository):
+    async def test_multiple_conversations(
+        self, conversation_repository, test_owner_sub
+    ):
         """Test creating and retrieving multiple conversations."""
         # Arrange & Act
-        conversation1 = await conversation_repository.create()
-        conversation2 = await conversation_repository.create()
+        conversation1 = await conversation_repository.create(test_owner_sub)
+        conversation2 = await conversation_repository.create(test_owner_sub)
 
         # Assert they are different
         assert conversation1.id != conversation2.id
@@ -118,13 +125,13 @@ class TestDatabaseErrorHandling:
         conversation = await conversation_repository.get(invalid_id)
         assert conversation is None
 
-    async def test_connection_resilience(self, conversation_repository):
+    async def test_connection_resilience(self, conversation_repository, test_owner_sub):
         """Test that the repository handles connection issues gracefully."""
         # This test would require more sophisticated setup to simulate
         # network issues or database unavailability
         # For now, we'll just test that the basic operations work
 
-        conversation = await conversation_repository.create()
+        conversation = await conversation_repository.create(test_owner_sub)
         assert conversation is not None
 
         retrieved = await conversation_repository.get(conversation.id)
@@ -142,10 +149,12 @@ class TestDatabaseIntegration:
         os.getenv("SKIP_DB_TESTS") == "true",
         reason="Database tests skipped - set SKIP_DB_TESTS=false to run",
     )
-    async def test_end_to_end_conversation_flow(self, conversation_repository):
+    async def test_end_to_end_conversation_flow(
+        self, conversation_repository, test_owner_sub
+    ):
         """Test the complete conversation lifecycle."""
         # Create
-        conversation = await conversation_repository.create()
+        conversation = await conversation_repository.create(test_owner_sub)
         assert conversation is not None
         original_id = conversation.id
 

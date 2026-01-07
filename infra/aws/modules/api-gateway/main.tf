@@ -11,6 +11,16 @@ resource "aws_api_gateway_rest_api" "main" {
   }
 }
 
+# Cognito user-pool authorizer to secure all routes
+resource "aws_api_gateway_authorizer" "companion_chat" {
+  name            = "CompanionChatAuthorizer"
+  rest_api_id     = aws_api_gateway_rest_api.main.id
+  identity_source = "method.request.header.Authorization"
+  type            = "COGNITO_USER_POOLS"
+  provider_arns   = ["arn:aws:cognito-idp:eu-west-1:111122223333:userpool/eu-west-1_example"]
+  authorizer_result_ttl_in_seconds = 300
+}
+
 # Root resource proxy to handle all paths
 resource "aws_api_gateway_resource" "proxy" {
   rest_api_id = aws_api_gateway_rest_api.main.id
@@ -23,7 +33,8 @@ resource "aws_api_gateway_method" "proxy" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_resource.proxy.id
   http_method   = "ANY"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.companion_chat.id
 }
 
 # Integration between API Gateway and Lambda
@@ -51,6 +62,7 @@ resource "aws_api_gateway_deployment" "main" {
   depends_on = [
     aws_api_gateway_method.proxy,
     aws_api_gateway_integration.lambda,
+    aws_api_gateway_authorizer.companion_chat,
   ]
 
   rest_api_id = aws_api_gateway_rest_api.main.id
@@ -60,6 +72,7 @@ resource "aws_api_gateway_deployment" "main" {
       aws_api_gateway_resource.proxy.id,
       aws_api_gateway_method.proxy.id,
       aws_api_gateway_integration.lambda.id,
+      aws_api_gateway_authorizer.companion_chat.id,
     ]))
   }
 
@@ -80,7 +93,8 @@ resource "aws_api_gateway_method" "proxy_root" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_rest_api.main.root_resource_id
   http_method   = "ANY"
-  authorization = "NONE"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.companion_chat.id
 }
 
 resource "aws_api_gateway_integration" "lambda_root" {

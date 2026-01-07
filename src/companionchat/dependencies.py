@@ -1,12 +1,17 @@
 from functools import lru_cache
+from itertools import count
 from typing import Annotated, Any, AsyncGenerator, Callable, Dict
 
 import aioboto3
 from botocore.config import Config
-from fastapi import Depends, Request
+from fastapi import Depends, HTTPException, Request, status
 from langchain_openai import ChatOpenAI
 from types_aiobotocore_dynamodb import DynamoDBClient
 
+from companionchat.authorization.conversation_authorizer import (
+    ConversationAuthorizationService,
+)
+from companionchat.authorization.jwt import extract_authorizer_claims
 from companionchat.db.repositories import ConversationRepository
 from companionchat.services.openai_service import MockOpenAIService, OpenAIService
 from companionchat.settings import get_settings
@@ -93,3 +98,57 @@ def get_openai_service() -> OpenAIService:
 
 
 OpenAIServiceDep = Annotated[OpenAIService, Depends(get_openai_service)]
+
+
+@lru_cache
+def get_conversation_authorization_service() -> ConversationAuthorizationService:
+    return ConversationAuthorizationService()
+
+
+ConversationAuthorizerDep = Annotated[
+    ConversationAuthorizationService, Depends(get_conversation_authorization_service)
+]
+
+
+def _get_fake_authenticated_sub_for_local(request: Request):
+    auth_header = request.headers.get("authorization")
+    if isinstance(auth_header, str) and auth_header.lower().startswith("bearer "):
+        token = auth_header[7:].strip()
+        if token:
+            request.state.auth_claims = {
+                "sub": token,
+                "source": "local-bearer",
+                "token": token,
+            }
+            return token
+
+
+async def get_authenticated_sub(request: Request) -> str:
+    settings = get_settings()
+
+    if settings.is_aws_lambda_environment:
+        claims = extract_authorizer_claims(request)
+        if claims and isinstance(claims.get("sub"), str):
+            request.state.auth_claims = claims
+            return claims["sub"]
+
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing authenticated user context from API Gateway authorizer",
+        )
+
+    else:
+        local_token = _get_fake_authenticated_sub_for_local(request)
+        if local_token:
+            return local_token
+
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Missing or invalid Authorization header for local development",
+        )
+
+
+_local_bearer_counter = count(1)
+
+
+AuthenticatedSubDep = Annotated[str, Depends(get_authenticated_sub)]
