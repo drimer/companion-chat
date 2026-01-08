@@ -8,7 +8,6 @@ Companion Chat app - AI-powered conversation assistant with Japanese language ex
 ```bash
 # 1. Set up environment
 cp .env.template .env  # Add your OpenAI API key
-poetry install
 
 # 2. Start local infrastructure
 docker-compose -f ./infra/docker-compose.yml up -d
@@ -22,7 +21,16 @@ aws dynamodb create-table \
   --endpoint-url http://localhost:8000
 ```
 
-4. Start the server
+4. Ensue you have available and activated the Python version defined in `pyproject.toml`.
+Recommended approach: install pyenv and run:
+
+  ```bash
+  pyenv install <version>
+  pyenv local <version>
+  poetry install
+  ```
+
+5. Start the server
 
 - VS Code: Launch the companion-chat [FastAPI] configuration from Run and Debug (uses .env).
 - Terminal:
