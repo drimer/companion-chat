@@ -23,7 +23,7 @@ but also create new Python modules and please all logic related to authz (author
 - [x] Add integration tests in [tests/integration/test_api_endpoints.py](tests/integration/test_api_endpoints.py) that mock API Gateway context to simulate different `sub` values, ensuring 403 for cross-user access.
 - [x] Extend e2e flow in [tests/e2e/test_full_conversation_flow.py](tests/e2e/test_full_conversation_flow.py) to create two users (e.g., `sub_a`, `sub_b`), confirming API Gateway rejects unauthorized access when the authorizer forwards claims.
 - [ ] Update [docs/api-usage.md](docs/api-usage.md) and [docs/development.md](docs/development.md) with the requirement to pass access tokens, describe the `CompanionChatAuthorizer`, and document the DynamoDB schema updates.
-- [ ] Modify infrastructure scripts (e.g., [infra/aws/modules/conversations-lambda](infra/aws/modules/conversations-lambda)) to provision `CompanionChatAuthorizer`, the `users` table, and the `user_id-index` before deploying code changes.
+- [ ] Modify infrastructure scripts (e.g., [infra/aws/modules/conversations-lambda](infra/aws/modules/conversations-lambda)) to provision the `users` table, and the `user_id-index` before deploying code changes.
 
 # Infrastructure
 

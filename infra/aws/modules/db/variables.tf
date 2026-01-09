@@ -3,6 +3,12 @@ variable "table_name" {
     description = "The name for the DynamoDB table"
 }
 
+variable "users_table_name" {
+    type        = string
+    description = "Logical name for the DynamoDB users table"
+    default     = "users"
+}
+
 variable "billing_mode" {
     type = string
     default = "PAY_PER_REQUEST"
