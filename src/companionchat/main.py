@@ -83,7 +83,6 @@ async def create_conversation(
 @app.get("/conversations/{conversation_id}")
 async def get_conversation(
     conversation_id: str,
-    conversation_repository: ConversationRepositoryDep,
     conversation_authorizer: ConversationAuthorizerDep,
     owner_sub: AuthenticatedSubDep,
 ) -> ConversationResponse:
@@ -96,20 +95,9 @@ async def get_conversation(
     """
     logger.logger.info(f"Retrieving conversation with ID: {conversation_id}")
 
-    try:
-        conversation = await conversation_repository.get(conversation_id)
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {exc}")
-
-    if conversation is None:
-        raise HTTPException(status_code=404, detail="Conversation not found")
-
-    try:
-        conversation_authorizer.ensure_owner(conversation, owner_sub)
-    except PermissionError as exc:
-        raise HTTPException(status_code=403, detail="Forbidden") from exc
+    conversation = await conversation_authorizer.ensure_owner(
+        conversation_id, owner_sub
+    )
 
     return ConversationResponse(
         id=conversation.id,
@@ -124,7 +112,6 @@ async def get_conversation(
 async def chat_with_conversation(
     conversation_id: str,
     chat_request: ChatRequest,
-    conversation_repository: ConversationRepositoryDep,
     openai_service: OpenAIServiceDep,
     conversation_authorizer: ConversationAuthorizerDep,
     owner_sub: AuthenticatedSubDep,
@@ -135,22 +122,9 @@ async def chat_with_conversation(
     This endpoint accepts the complete conversation history from the client
     and sends it to OpenAI for processing. Returns the AI assistant's response.
     """
-    logger.logger.info(f"New message in conversation ID: {conversation_id}")
-
-    try:
-        conversation = await conversation_repository.get(conversation_id)
-    except ValueError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {exc}")
-
-    if conversation is None:
-        raise HTTPException(status_code=404, detail="Conversation not found")
-
-    try:
-        conversation_authorizer.ensure_owner(conversation, owner_sub)
-    except PermissionError as exc:
-        raise HTTPException(status_code=403, detail="Forbidden") from exc
+    conversation = await conversation_authorizer.ensure_owner(
+        conversation_id, owner_sub
+    )
 
     response = await openai_service.process_chat_request(
         system_prompt=conversation.system_prompt, chat_request=chat_request

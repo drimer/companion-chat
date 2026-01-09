@@ -8,6 +8,7 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from fastapi import HTTPException
 from httpx import ASGITransport, AsyncClient
 
 from companionchat.dependencies import (
@@ -32,7 +33,7 @@ def mock_conversation_repository():
 def mock_conversation_authorizer():
     """Mock the conversation authorization service."""
     authorizer = MagicMock()
-    authorizer.ensure_owner = MagicMock()
+    authorizer.ensure_owner = AsyncMock()
     return authorizer
 
 
@@ -114,7 +115,6 @@ class TestConversationEndpoints:
     async def test_get_conversation(
         self,
         async_client,
-        mock_conversation_repository,
         mock_conversation_authorizer,
     ):
         """Test conversation retrieval endpoint."""
@@ -126,7 +126,7 @@ class TestConversationEndpoints:
         mock_conversation.user_id = AUTH_SUB
         mock_conversation.created_at = datetime.now()
 
-        mock_conversation_repository.get.return_value = mock_conversation
+        mock_conversation_authorizer.ensure_owner.return_value = mock_conversation
 
         # Act
         response = await async_client.get(f"/conversations/{conversation_id}")
@@ -140,18 +140,19 @@ class TestConversationEndpoints:
         assert "created_at" in data
         assert data["messages"] == []
 
-        mock_conversation_repository.get.assert_awaited_once_with(conversation_id)
-        mock_conversation_authorizer.ensure_owner.assert_called_once_with(
-            mock_conversation, AUTH_SUB
+        mock_conversation_authorizer.ensure_owner.assert_awaited_once_with(
+            conversation_id, AUTH_SUB
         )
 
     async def test_get_nonexistent_conversation(
-        self, async_client, mock_conversation_repository
+        self, async_client, mock_conversation_authorizer
     ):
         """Test retrieving a conversation that doesn't exist."""
         # Arrange
         conversation_id = str(uuid.uuid4())
-        mock_conversation_repository.get.return_value = None
+        mock_conversation_authorizer.ensure_owner.side_effect = HTTPException(
+            status_code=404, detail="Conversation not found"
+        )
 
         # Act
         response = await async_client.get(f"/conversations/{conversation_id}")
@@ -164,7 +165,6 @@ class TestConversationEndpoints:
     async def test_get_conversation_forbidden(
         self,
         async_client,
-        mock_conversation_repository,
         mock_conversation_authorizer,
     ):
         conversation_id = str(uuid.uuid4())
@@ -174,8 +174,9 @@ class TestConversationEndpoints:
         mock_conversation.user_id = "other-user"
         mock_conversation.created_at = datetime.now()
 
-        mock_conversation_repository.get.return_value = mock_conversation
-        mock_conversation_authorizer.ensure_owner.side_effect = PermissionError()
+        mock_conversation_authorizer.ensure_owner.side_effect = HTTPException(
+            status_code=403, detail="Forbidden"
+        )
 
         response = await async_client.get(f"/conversations/{conversation_id}")
 
@@ -189,7 +190,6 @@ class TestChatEndpoint:
     async def test_chat_with_conversation(
         self,
         async_client,
-        mock_conversation_repository,
         mock_openai_service,
         mock_conversation_authorizer,
     ):
@@ -202,7 +202,7 @@ class TestChatEndpoint:
         mock_conversation.id = conversation_id
         mock_conversation.system_prompt = "You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak."
         mock_conversation.user_id = AUTH_SUB
-        mock_conversation_repository.get.return_value = mock_conversation
+        mock_conversation_authorizer.ensure_owner.return_value = mock_conversation
 
         # Mock OpenAI response
         mock_chat_response = ChatResponse(
@@ -242,23 +242,23 @@ class TestChatEndpoint:
         assert data["usage"]["total_tokens"] == 45
 
         # Verify service calls
-        mock_conversation_repository.get.assert_awaited_once_with(conversation_id)
-        mock_conversation_authorizer.ensure_owner.assert_called_once_with(
-            mock_conversation, AUTH_SUB
+        mock_conversation_authorizer.ensure_owner.assert_awaited_once_with(
+            conversation_id, AUTH_SUB
         )
         mock_openai_service.process_chat_request.assert_awaited_once()
 
     async def test_chat_with_nonexistent_conversation(
         self,
         async_client,
-        mock_conversation_repository,
         mock_openai_service,
+        mock_conversation_authorizer,
     ):
         """Test chat endpoint with conversation that doesn't exist."""
         # Arrange
         conversation_id = str(uuid.uuid4())
-        mock_conversation_repository.get.side_effect = ValueError(
-            f"Conversation with ID {conversation_id} not found."
+        mock_conversation_authorizer.ensure_owner.side_effect = HTTPException(
+            status_code=404,
+            detail=f"Conversation with ID {conversation_id} not found.",
         )
 
         chat_request = {"messages": [{"role": "user", "content": "Hello!"}]}
@@ -279,7 +279,6 @@ class TestChatEndpoint:
     async def test_chat_forbidden_for_other_user(
         self,
         async_client,
-        mock_conversation_repository,
         mock_openai_service,
         mock_conversation_authorizer,
     ):
@@ -288,8 +287,9 @@ class TestChatEndpoint:
         mock_conversation.id = conversation_id
         mock_conversation.system_prompt = "Prompt"
         mock_conversation.user_id = "different"
-        mock_conversation_repository.get.return_value = mock_conversation
-        mock_conversation_authorizer.ensure_owner.side_effect = PermissionError()
+        mock_conversation_authorizer.ensure_owner.side_effect = HTTPException(
+            status_code=403, detail="Forbidden"
+        )
 
         chat_request = {
             "messages": [
@@ -308,7 +308,6 @@ class TestChatEndpoint:
     async def test_chat_with_empty_conversation_history(
         self,
         async_client,
-        mock_conversation_repository,
         mock_openai_service,
         mock_conversation_authorizer,
     ):
@@ -320,7 +319,7 @@ class TestChatEndpoint:
         mock_conversation.id = conversation_id
         mock_conversation.system_prompt = "Test prompt"
         mock_conversation.user_id = AUTH_SUB
-        mock_conversation_repository.get.return_value = mock_conversation
+        mock_conversation_authorizer.ensure_owner.return_value = mock_conversation
 
         # Mock OpenAI response for empty messages
         mock_chat_response = ChatResponse(
@@ -341,12 +340,12 @@ class TestChatEndpoint:
         data = response.json()
         assert "message" in data
         assert "usage" in data
-        mock_conversation_authorizer.ensure_owner.assert_called_once_with(
-            mock_conversation, AUTH_SUB
+        mock_conversation_authorizer.ensure_owner.assert_awaited_once_with(
+            conversation_id, AUTH_SUB
         )
 
     async def test_chat_with_invalid_message_format(
-        self, async_client, mock_conversation_repository
+        self, async_client, mock_conversation_authorizer
     ):
         """Test chat endpoint with invalid message format."""
         # Arrange
@@ -355,7 +354,7 @@ class TestChatEndpoint:
         mock_conversation = MagicMock()
         mock_conversation.id = conversation_id
         mock_conversation.user_id = AUTH_SUB
-        mock_conversation_repository.get.return_value = mock_conversation
+        mock_conversation_authorizer.ensure_owner.return_value = mock_conversation
 
         # Missing 'role' field
         chat_request = {"messages": [{"content": "Hello!"}]}

@@ -100,9 +100,12 @@ def get_openai_service() -> OpenAIService:
 OpenAIServiceDep = Annotated[OpenAIService, Depends(get_openai_service)]
 
 
-@lru_cache
-def get_conversation_authorization_service() -> ConversationAuthorizationService:
-    return ConversationAuthorizationService()
+def get_conversation_authorization_service(
+    conversation_repository: ConversationRepository = Depends(
+        get_conversation_repository
+    ),
+) -> ConversationAuthorizationService:
+    return ConversationAuthorizationService(conversation_repository)
 
 
 ConversationAuthorizerDep = Annotated[
