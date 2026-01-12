@@ -57,3 +57,8 @@ output "cognito_user_pool_arn" {
   description = "ARN of the Cognito user pool"
   value       = module.cognito.user_pool_arn
 }
+
+output "cognito_issuer_url" {
+  description = "Issuer URL of the Cognito user pool"
+  value       = module.cognito.issuer_url
+}

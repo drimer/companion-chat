@@ -12,3 +12,8 @@ output "user_pool_client_id" {
   value       = aws_cognito_user_pool_client.app.id
   description = "Client ID for the default app client"
 }
+
+output "issuer_url" {
+  value       = aws_cognito_user_pool.this.endpoint
+  description = "Issuer URL for the Cognito user pool"
+}
