@@ -81,3 +81,9 @@ resource "aws_cognito_user_pool_client" "app" {
     refresh_token = "days"
   }
 }
+
+resource "aws_cognito_user_pool_domain" "managed" {
+  domain                 = lower(local.user_pool_domain_prefix)
+  user_pool_id           = aws_cognito_user_pool.this.id
+  managed_login_version  = 2
+}
