@@ -17,7 +17,7 @@ resource "aws_api_gateway_authorizer" "companion_chat" {
   rest_api_id     = aws_api_gateway_rest_api.main.id
   identity_source = "method.request.header.Authorization"
   type            = "COGNITO_USER_POOLS"
-  provider_arns   = ["arn:aws:cognito-idp:eu-west-1:111122223333:userpool/eu-west-1_example"]
+  provider_arns   = [var.cognito_user_pool_arn]
   authorizer_result_ttl_in_seconds = 300
 }
 

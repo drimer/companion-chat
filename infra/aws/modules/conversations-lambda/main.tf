@@ -32,7 +32,8 @@ resource "aws_iam_policy" "conversations_lambda_policy" {
           "dynamodb:DeleteItem"
         ],
         "Resource": [
-          "${var.db_conversations_table_arn}"
+          "${var.db_conversations_table_arn}",
+          "${var.db_users_table_arn}"
         ]
       },
       {
@@ -84,6 +85,7 @@ resource "aws_lambda_function" "conversations" {
   environment {
     variables = {
       DB_CONVERSATIONS_TABLE_NAME = var.db_conversations_table_name
+      DB_USERS_TABLE_NAME         = var.db_users_table_name
       OPENAI_API_KEY = var.openai_api_key
       OPENAI_MODEL = var.openai_model
       MAX_TOKENS = var.max_tokens
