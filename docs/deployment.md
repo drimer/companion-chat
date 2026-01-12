@@ -21,7 +21,8 @@
            "lambda:*",
            "iam:*",
            "logs:*",
-           "apigateway:*"
+           "apigateway:*",
+           "cognito-idp:*"
          ],
          "Resource": "*"
        }
