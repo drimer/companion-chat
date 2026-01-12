@@ -93,3 +93,78 @@ resource "aws_cognito_user_pool_domain" "managed" {
   user_pool_id           = aws_cognito_user_pool.this.id
   managed_login_version  = 2
 }
+
+resource "aws_cognito_user_pool_ui_customization" "managed_theme" {
+  user_pool_id = aws_cognito_user_pool.this.id
+  client_id    = aws_cognito_user_pool_client.app.id
+
+  css = <<CSS
+:root {
+  --primary-color: #183153;
+  --accent-color: #23adb3;
+  --text-color: #101828;
+  --background-color: #f6f8fb;
+}
+
+body,
+.background,
+.banner,
+.modal,
+.modal-body,
+.form-container {
+  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--background-color);
+  color: var(--text-color);
+}
+
+.banner,
+.modal-header,
+.section-name,
+.modal-divider {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: #ffffff;
+}
+
+.btn,
+button {
+  background-color: var(--primary-color);
+  border-radius: 9999px;
+  border: none;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 0.85rem 1.6rem;
+  box-shadow: 0 10px 25px rgba(24, 49, 83, 0.25);
+}
+
+.btn:hover,
+button:hover {
+  background-color: var(--accent-color);
+  box-shadow: 0 12px 28px rgba(35, 173, 179, 0.35);
+}
+
+input,
+select {
+  border: 1px solid rgba(16, 24, 40, 0.15);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  font-size: 1rem;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(35, 173, 179, 0.25);
+}
+
+a,
+.link {
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.logo img {
+  filter: drop-shadow(0 8px 24px rgba(24, 49, 83, 0.25));
+}
+CSS
+}
