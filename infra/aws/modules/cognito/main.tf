@@ -5,6 +5,12 @@ locals {
 }
 
 data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
+
+locals {
+  user_pool_domain_hash = substr(sha1("${data.aws_caller_identity.current.account_id}-${local.user_pool_domain_prefix}"), 0, 6)
+  user_pool_domain_name = lower("${local.user_pool_domain_prefix}-${local.user_pool_domain_hash}")
+}
 
 resource "aws_cognito_user_pool" "this" {
   name                       = local.user_pool_name
@@ -83,7 +89,7 @@ resource "aws_cognito_user_pool_client" "app" {
 }
 
 resource "aws_cognito_user_pool_domain" "managed" {
-  domain                 = lower(local.user_pool_domain_prefix)
+  domain                 = local.user_pool_domain_name
   user_pool_id           = aws_cognito_user_pool.this.id
   managed_login_version  = 2
 }
