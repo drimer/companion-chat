@@ -99,71 +99,54 @@ resource "aws_cognito_user_pool_ui_customization" "managed_theme" {
   client_id    = aws_cognito_user_pool_client.app.id
 
   css = <<CSS
-:root {
-  --primary-color: #183153;
-  --accent-color: #23adb3;
-  --text-color: #101828;
-  --background-color: #f6f8fb;
-}
-
 body,
 .background,
-.banner,
 .modal,
-.modal-body,
 .form-container {
-  font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-  background: var(--background-color);
-  color: var(--text-color);
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  background-color: #f6f8fb;
+  color: #101828;
 }
 
 .banner,
 .modal-header,
-.section-name,
-.modal-divider {
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+.section-name {
+  background-color: #183153;
   color: #ffffff;
 }
 
 .btn,
 button {
-  background-color: var(--primary-color);
-  border-radius: 9999px;
+  background-color: #183153;
   border: none;
+  border-radius: 999px;
   color: #ffffff;
   font-weight: 600;
-  padding: 0.85rem 1.6rem;
-  box-shadow: 0 10px 25px rgba(24, 49, 83, 0.25);
+  padding: 14px 28px;
 }
 
 .btn:hover,
 button:hover {
-  background-color: var(--accent-color);
-  box-shadow: 0 12px 28px rgba(35, 173, 179, 0.35);
+  background-color: #23adb3;
 }
 
 input,
 select {
-  border: 1px solid rgba(16, 24, 40, 0.15);
+  border: 1px solid #d0d5dd;
   border-radius: 12px;
-  padding: 0.9rem 1rem;
-  font-size: 1rem;
-  transition: border 0.2s ease, box-shadow 0.2s ease;
+  padding: 12px 16px;
 }
 
 input:focus,
 select:focus {
-  border-color: var(--accent-color);
+  border-color: #23adb3;
   box-shadow: 0 0 0 3px rgba(35, 173, 179, 0.25);
 }
 
 a,
 .link {
-  color: var(--accent-color);
+  color: #23adb3;
   font-weight: 600;
 }
-
-.logo img {
-  filter: drop-shadow(0 8px 24px rgba(24, 49, 83, 0.25));
-}
 CSS
+}
