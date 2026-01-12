@@ -17,3 +17,13 @@ output "issuer_url" {
   value       = aws_cognito_user_pool.this.endpoint
   description = "Issuer URL for the Cognito user pool"
 }
+
+output "user_pool_domain" {
+  value       = aws_cognito_user_pool_domain.this.domain
+  description = "Domain prefix assigned to the hosted UI"
+}
+
+output "user_pool_hosted_ui_url" {
+  value       = "https://${aws_cognito_user_pool_domain.this.domain}.auth.${data.aws_region.current.name}.amazoncognito.com"
+  description = "Base URL for the Cognito hosted UI"
+}

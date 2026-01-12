@@ -1,7 +1,10 @@
 locals {
-  user_pool_name        = join("-", compact(tolist([var.group, var.environment, var.scope, "users"])))
-  user_pool_client_name = "${local.user_pool_name}-client"
+  user_pool_name          = join("-", compact(tolist([var.group, var.environment, var.scope, "users"])))
+  user_pool_client_name   = "${local.user_pool_name}-client"
+  user_pool_domain_prefix = var.domain_prefix != "" ? var.domain_prefix : replace(local.user_pool_name, "_", "-")
 }
+
+data "aws_region" "current" {}
 
 resource "aws_cognito_user_pool" "this" {
   name                       = local.user_pool_name
@@ -26,6 +29,9 @@ resource "aws_cognito_user_pool_client" "app" {
   generate_secret               = false
   prevent_user_existence_errors = "ENABLED"
   supported_identity_providers  = ["COGNITO"]
+  allowed_oauth_flows_user_pool_client = true
+  allowed_oauth_flows                 = var.allowed_oauth_flows
+  allowed_oauth_scopes                = var.allowed_oauth_scopes
 
   explicit_auth_flows = [
     "ALLOW_REFRESH_TOKEN_AUTH",
@@ -33,10 +39,11 @@ resource "aws_cognito_user_pool_client" "app" {
     "ALLOW_USER_SRP_AUTH",
   ]
 
-  callback_urls = [
-    "companionchat://auth/callback",  
-  ]
-  logout_urls   = [
-    "companionchat://auth/callback",  
-  ]
+  callback_urls = var.callback_urls
+  logout_urls   = var.logout_urls
+}
+
+resource "aws_cognito_user_pool_domain" "this" {
+  domain       = lower(local.user_pool_domain_prefix)
+  user_pool_id = aws_cognito_user_pool.this.id
 }

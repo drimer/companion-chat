@@ -30,6 +30,7 @@ provider "aws" {
 locals {
     environment = terraform.workspace == "default" ? "dev" : terraform.workspace
     group_global = "companion-chat"
+    cognito_domain_prefix = var.cognito_domain_prefix != "" ? var.cognito_domain_prefix : join("-", compact(tolist([local.group_global, local.environment, "chat", "auth"])))
 }
 
 module "db" {
@@ -47,6 +48,9 @@ module "cognito" {
     group       = local.group_global
     environment = local.environment
     scope       = "chat"
+    callback_urls = var.cognito_callback_urls
+    logout_urls   = var.cognito_logout_urls
+    domain_prefix = lower(local.cognito_domain_prefix)
 }
 
 module "conversations_lambda" {

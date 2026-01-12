@@ -12,11 +12,17 @@ variable "openai_api_key" {
 variable "cognito_callback_urls" {
     description = "Allowed OAuth callback URLs for the Cognito app client"
     type        = list(string)
-    default     = []
+    default     = ["companionchat://auth/callback"]
 }
 
 variable "cognito_logout_urls" {
     description = "Allowed logout URLs for the Cognito app client"
     type        = list(string)
-    default     = []
+    default     = ["companionchat://auth/callback"]
+}
+
+variable "cognito_domain_prefix" {
+    description = "Optional override for the Cognito hosted UI domain prefix"
+    type        = string
+    default     = ""
 }
