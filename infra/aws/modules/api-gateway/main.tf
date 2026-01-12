@@ -11,6 +11,39 @@ resource "aws_api_gateway_rest_api" "main" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "api_gateway_access" {
+  name              = "/aws/apigateway/${aws_api_gateway_rest_api.main.name}-${var.environment}"
+  retention_in_days = var.log_retention_in_days
+}
+
+resource "aws_iam_role" "api_gateway_cloudwatch" {
+  name = "${aws_api_gateway_rest_api.main.name}-${var.environment}-logs-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "apigateway.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "api_gateway_cloudwatch" {
+  role       = aws_iam_role.api_gateway_cloudwatch.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
+}
+
+resource "aws_api_gateway_account" "logging" {
+  cloudwatch_role_arn = aws_iam_role.api_gateway_cloudwatch.arn
+
+  depends_on = [aws_iam_role_policy_attachment.api_gateway_cloudwatch]
+}
+
 # Cognito user-pool authorizer to secure all routes
 resource "aws_api_gateway_authorizer" "companion_chat" {
   name            = "CompanionChatAuthorizer"
@@ -86,6 +119,37 @@ resource "aws_api_gateway_stage" "main" {
   deployment_id = aws_api_gateway_deployment.main.id
   rest_api_id   = aws_api_gateway_rest_api.main.id
   stage_name    = var.environment
+
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.api_gateway_access.arn
+    format = jsonencode({
+      requestId       = "$context.requestId"
+      ip              = "$context.identity.sourceIp"
+      requestTime     = "$context.requestTime"
+      httpMethod      = "$context.httpMethod"
+      routeKey        = "$context.routeKey"
+      status          = "$context.status"
+      protocol        = "$context.protocol"
+      responseLength  = "$context.responseLength"
+      error           = "$context.error.message"
+      integrationError = "$context.integrationError"
+      authorizerError  = "$context.authorizer.error"
+    })
+  }
+
+  depends_on = [aws_api_gateway_account.logging]
+}
+
+resource "aws_api_gateway_method_settings" "main" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  stage_name  = aws_api_gateway_stage.main.stage_name
+  method_path = "*/*"
+
+  settings {
+    metrics_enabled    = true
+    logging_level      = var.execution_log_level
+    data_trace_enabled = var.enable_execution_logs
+  }
 }
 
 # CORS support for root resource
