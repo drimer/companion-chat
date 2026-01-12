@@ -9,9 +9,9 @@ data "aws_region" "current" {}
 resource "aws_cognito_user_pool" "this" {
   name                       = local.user_pool_name
   auto_verified_attributes   = ["email"]
+  username_attributes        = ["email"]
   mfa_configuration          = "OFF"
   deletion_protection        = "INACTIVE"
-  email_verification_subject = "Verify your Companion Chat account"
 
   password_policy {
     minimum_length                   = 8
@@ -20,6 +20,35 @@ resource "aws_cognito_user_pool" "this" {
     require_symbols                  = false
     require_uppercase                = true
     temporary_password_validity_days = 7
+    password_history_size = 0
+  }
+
+  account_recovery_setting {
+    recovery_mechanism {
+      name = "verified_email"
+      priority = 1
+    }
+    recovery_mechanism {
+      name = "verified_phone_number"
+      priority = 2
+    }
+  }
+
+  admin_create_user_config {
+    allow_admin_create_user_only = false
+  }
+
+  email_configuration {
+    email_sending_account = "COGNITO_DEFAULT"
+  }
+
+  sign_in_policy {
+    allowed_first_auth_factors = ["PASSWORD"] 
+  }
+
+  verification_message_template {
+    default_email_option = "CONFIRM_WITH_CODE"
+    email_subject = "Verify your Companion Chat account"
   }
 }
 
@@ -35,15 +64,16 @@ resource "aws_cognito_user_pool_client" "app" {
 
   explicit_auth_flows = [
     "ALLOW_REFRESH_TOKEN_AUTH",
-    "ALLOW_USER_PASSWORD_AUTH",
+    "ALLOW_USER_AUTH",
     "ALLOW_USER_SRP_AUTH",
   ]
 
   callback_urls = var.callback_urls
   logout_urls   = var.logout_urls
-}
 
-resource "aws_cognito_user_pool_domain" "this" {
-  domain       = lower(local.user_pool_domain_prefix)
-  user_pool_id = aws_cognito_user_pool.this.id
+  token_validity_units {
+    access_token = "minutes"
+    id_token = "minutes"
+    refresh_token = "days"
+  }
 }

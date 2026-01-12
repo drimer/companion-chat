@@ -129,6 +129,11 @@ def _get_fake_authenticated_sub_for_local(request: Request):
 async def get_authenticated_sub(request: Request) -> str:
     settings = get_settings()
 
+    print("===================== request.headers =====================")
+    for key, value in request.headers.items():
+        print(f"{key}: {value}")
+    print("==========================================================")
+
     if settings.is_aws_lambda_environment:
         claims = extract_authorizer_claims(request)
         if claims and isinstance(claims.get("sub"), str):

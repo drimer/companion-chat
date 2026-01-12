@@ -62,13 +62,3 @@ output "cognito_issuer_url" {
   description = "Issuer URL of the Cognito user pool"
   value       = module.cognito.issuer_url
 }
-
-output "cognito_user_pool_domain" {
-  description = "Domain prefix backing the Cognito hosted UI"
-  value       = module.cognito.user_pool_domain
-}
-
-output "cognito_hosted_ui_url" {
-  description = "Base URL for the Cognito hosted UI"
-  value       = module.cognito.user_pool_hosted_ui_url
-}
