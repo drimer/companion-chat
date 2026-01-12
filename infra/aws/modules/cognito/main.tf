@@ -167,4 +167,3 @@ a,
   filter: drop-shadow(0 8px 24px rgba(24, 49, 83, 0.25));
 }
 CSS
-}
