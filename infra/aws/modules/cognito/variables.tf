@@ -40,5 +40,5 @@ variable "allowed_oauth_flows" {
 variable "allowed_oauth_scopes" {
   type        = list(string)
   description = "OAuth scopes granted to hosted UI clients"
-  default     = ["email", "openid", "profile", "oauth"]
+  default     = ["email", "openid", "profile", "oauth2"]
 }
