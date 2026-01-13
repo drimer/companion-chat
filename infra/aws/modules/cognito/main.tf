@@ -89,64 +89,18 @@ resource "aws_cognito_user_pool_client" "app" {
 }
 
 resource "aws_cognito_user_pool_domain" "managed" {
+  depends_on = [aws_cognito_user_pool.this]
+
   domain                 = local.user_pool_domain_name
   user_pool_id           = aws_cognito_user_pool.this.id
   managed_login_version  = 2
 }
 
 resource "aws_cognito_user_pool_ui_customization" "managed_theme" {
+  depends_on = [aws_cognito_user_pool_domain.managed]
+
   user_pool_id = aws_cognito_user_pool.this.id
   client_id    = aws_cognito_user_pool_client.app.id
 
-  css = <<CSS
-body,
-.background,
-.modal,
-.form-container {
-  font-family: "Inter", "Segoe UI", Arial, sans-serif;
-  background-color: #f6f8fb;
-  color: #101828;
-}
-
-.banner,
-.modal-header,
-.section-name {
-  background-color: #183153;
-  color: #ffffff;
-}
-
-.btn,
-button {
-  background-color: #183153;
-  border: none;
-  border-radius: 999px;
-  color: #ffffff;
-  font-weight: 600;
-  padding: 14px 28px;
-}
-
-.btn:hover,
-button:hover {
-  background-color: #23adb3;
-}
-
-input,
-select {
-  border: 1px solid #d0d5dd;
-  border-radius: 12px;
-  padding: 12px 16px;
-}
-
-input:focus,
-select:focus {
-  border-color: #23adb3;
-  box-shadow: 0 0 0 3px rgba(35, 173, 179, 0.25);
-}
-
-a,
-.link {
-  color: #23adb3;
-  font-weight: 600;
-}
-CSS
+  css = file("${path.module}/managed_theme.css")
 }

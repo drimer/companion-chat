@@ -1,0 +1,54 @@
+.body-customizable {
+  font-family: "Inter", "Segoe UI", Arial, sans-serif;
+  background: #f6f8fb;
+  color: #101828;
+}
+
+.banner-customizable,
+.item-customizable {
+  background-color: #183153;
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.banner-title-customizable,
+.banner-subtitle-customizable {
+  color: #ffffff;
+}
+
+.label-customizable,
+.text-description-customizable {
+  color: #475467;
+}
+
+.input-customizable {
+  border: 1px solid #d0d5dd;
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: #101828;
+}
+
+.input-customizable:focus {
+  border-color: #23adb3;
+  box-shadow: 0 0 0 3px rgba(35, 173, 179, 0.25);
+}
+
+.submit-customizable {
+  background-color: #183153;
+  border: none;
+  border-radius: 999px;
+  color: #ffffff;
+  font-weight: 600;
+  padding: 14px 28px;
+}
+
+.submit-customizable:hover {
+  background-color: #23adb3;
+}
+
+.link-customizable,
+.legal-text-customizable {
+  color: #23adb3;
+  font-weight: 600;
+}
