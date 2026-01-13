@@ -95,12 +95,3 @@ resource "aws_cognito_user_pool_domain" "managed" {
   user_pool_id           = aws_cognito_user_pool.this.id
   managed_login_version  = 2
 }
-
-resource "aws_cognito_user_pool_ui_customization" "managed_theme" {
-  depends_on = [aws_cognito_user_pool_domain.managed]
-
-  user_pool_id = aws_cognito_user_pool.this.id
-  client_id    = aws_cognito_user_pool_client.app.id
-
-  css = file("${path.module}/managed_theme.css")
-}
