@@ -60,7 +60,7 @@ module "conversations_lambda" {
     scope = "chat"
     lambda_function_name = "conversations-lambda"
     lambda_function_handler = "src.companionchat.main.handler"
-    lambda_function_runtime = "python3.10"
+    lambda_function_runtime = "python3.13"
     db_conversations_table_arn = module.db.conversations_table_arn
     db_conversations_table_name = module.db.conversations_table_name
     db_users_table_arn = module.db.users_table_arn
