@@ -107,12 +107,7 @@ resource "aws_api_gateway_deployment" "main" {
   rest_api_id = aws_api_gateway_rest_api.main.id
 
   triggers = {
-    redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.proxy.id,
-      aws_api_gateway_method.proxy.id,
-      aws_api_gateway_integration.lambda.id,
-      aws_api_gateway_authorizer.companion_chat.id,
-    ]))
+    redeployment = timestamp()
   }
 
   lifecycle {
