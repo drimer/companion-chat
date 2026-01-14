@@ -5,3 +5,11 @@ output "conversations_table_name" {
 output "conversations_table_arn" {
     value = aws_dynamodb_table.conversations_table.arn
 }
+
+output "users_table_name" {
+    value = aws_dynamodb_table.users_table.name
+}
+
+output "users_table_arn" {
+    value = aws_dynamodb_table.users_table.arn
+}

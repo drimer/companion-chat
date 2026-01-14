@@ -38,6 +38,16 @@ variable "db_conversations_table_name" {
     description = "The name for the DynamoDB conversations table"
 }
 
+variable "db_users_table_arn" {
+    type        = string
+    description = "The ARN for the DynamoDB users table"
+}
+
+variable "db_users_table_name" {
+    type        = string
+    description = "The name for the DynamoDB users table"
+}
+
 variable "openai_model" {
     type = string
     description = "The OpenAI model to use for chat completion"

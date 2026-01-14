@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timezone
 from typing import Optional, Union
 from uuid import UUID, uuid4
@@ -66,15 +68,13 @@ Example:
 - 部屋 (へや) - room
 """
 
-DEFAULT_USER_ID = "default-user-123"  # Temporary until authentication is implemented
-
 
 class ConversationRepository:
     def __init__(self, client: DynamoDBClient, table_name: str):
         self.client = client
         self.table_name = table_name
 
-    async def create(self) -> Conversation:
+    async def create(self, owner_sub: str) -> Conversation:
         try:
             conversation_id = uuid4()
             created_at = datetime.now(timezone.utc)
@@ -84,7 +84,7 @@ class ConversationRepository:
                 Item={
                     "id": {"S": str(conversation_id)},
                     "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
-                    "user_id": {"S": DEFAULT_USER_ID},
+                    "user_id": {"S": owner_sub},
                     "created_at": {"S": created_at.isoformat()},
                 },
             )
@@ -95,7 +95,7 @@ class ConversationRepository:
             return Conversation(
                 id=conversation_id,
                 system_prompt=DEFAULT_SYSTEM_PROMPT,
-                user_id=DEFAULT_USER_ID,
+                user_id=owner_sub,
                 created_at=created_at,
             )
         except Exception as e:
@@ -112,13 +112,31 @@ class ConversationRepository:
             )
             item = response.get("Item")
             if not item:
-                return None  # Return None instead of raising ValueError
+                return None
 
-            return Conversation(
-                id=UUID(item["id"]["S"]),  # Convert string back to UUID
-                system_prompt=item["system_prompt"]["S"],
-                user_id=item["user_id"]["S"],
-                created_at=datetime.fromisoformat(item["created_at"]["S"]),
-            )
+            return self._deserialize_conversation(item)
         except Exception as e:
             raise Exception(f"Error retrieving conversation: {e}")
+
+    async def list_for_user(self, owner_sub: str) -> list[Conversation]:
+        try:
+            response = await self.client.query(
+                TableName=self.table_name,
+                IndexName="user_id-index",
+                KeyConditionExpression="user_id = :owner",
+                ExpressionAttributeValues={":owner": {"S": owner_sub}},
+            )
+
+            items = response.get("Items", [])
+            return [self._deserialize_conversation(item) for item in items]
+        except Exception as e:
+            raise Exception(f"Error listing conversations for user: {e}")
+
+    @staticmethod
+    def _deserialize_conversation(item: dict[str, dict[str, str]]) -> Conversation:
+        return Conversation(
+            id=UUID(item["id"]["S"]),
+            system_prompt=item["system_prompt"]["S"],
+            user_id=item["user_id"]["S"],
+            created_at=datetime.fromisoformat(item["created_at"]["S"]),
+        )

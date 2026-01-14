@@ -1,10 +1,19 @@
 # API Usage Guide
 
+## Authentication
+
+All requests must include a valid Cognito access token so API Gateway's `CompanionChatAuthorizer` can forward the caller's `sub` claim to the Lambda. Without the `Authorization: Bearer <token>` header, the backend returns `401` before touching any FastAPI code. When running locally you can still send any opaque token; the bearer token string is treated as the acting `sub` to mimic Cognito claims.
+
+```bash
+export ACCESS_TOKEN="<cognito-access-token>"
+```
+
 ## Create a Conversation
 
 ```bash
 curl -X POST "http://localhost:4000/conversations" \
-  -H "Content-Type: application/json"
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
 **Response**:
@@ -22,6 +31,7 @@ curl -X POST "http://localhost:4000/conversations" \
 ```bash
 curl -X POST "http://localhost:4000/conversations/{conversation_id}/chat" \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}" \
   -d '{
     "messages": [
       {
@@ -47,7 +57,8 @@ curl -X POST "http://localhost:4000/conversations/{conversation_id}/chat" \
 ## Get Conversation Metadata
 
 ```bash
-curl "http://localhost:4000/conversations/{conversation_id}"
+curl "http://localhost:4000/conversations/{conversation_id}" \
+  -H "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
 ## Production API Testing

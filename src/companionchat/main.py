@@ -1,9 +1,16 @@
+import os
 from typing import Dict
 
 from fastapi import FastAPI, HTTPException, logger
 from mangum import Mangum
 
-from companionchat.dependencies import ConversationRepositoryDep, OpenAIServiceDep
+from companionchat.dependencies import (
+    AuthenticatedSubDep,
+    ConversationAuthorizerDep,
+    ConversationRepositoryDep,
+    OpenAIServiceDep,
+    get_authenticated_sub,
+)
 from companionchat.schemas.conversations import (
     ChatRequest,
     ChatResponse,
@@ -19,11 +26,20 @@ app = FastAPI(
 
 configure_logging()
 
+_local_sub = os.getenv("COMPANIONCHAT_LOCAL_SUB")
+if _local_sub:
+
+    async def _local_sub_override() -> str:
+        return _local_sub
+
+    app.dependency_overrides[get_authenticated_sub] = _local_sub_override
+
 
 @app.post("/conversations", response_model=ConversationResponse, status_code=201)
 async def create_conversation(
     conversation_repository: ConversationRepositoryDep,
     openai_service: OpenAIServiceDep,
+    owner_sub: AuthenticatedSubDep,
 ) -> ConversationResponse:
     """
     Creates a new conversation and returns it.
@@ -32,7 +48,7 @@ async def create_conversation(
     The conversation metadata (ID, system prompt, user ID, created_at) is stored,
     but no messages are stored in the database.
     """
-    conversation = await conversation_repository.create()
+    conversation = await conversation_repository.create(owner_sub)
 
     logger.logger.info(f"Created a new conversation with ID: {conversation.id}")
 
@@ -67,7 +83,8 @@ async def create_conversation(
 @app.get("/conversations/{conversation_id}")
 async def get_conversation(
     conversation_id: str,
-    conversation_repository: ConversationRepositoryDep,
+    conversation_authorizer: ConversationAuthorizerDep,
+    owner_sub: AuthenticatedSubDep,
 ) -> ConversationResponse:
     """
     Retrieves a conversation by its ID.
@@ -78,27 +95,26 @@ async def get_conversation(
     """
     logger.logger.info(f"Retrieving conversation with ID: {conversation_id}")
 
-    try:
-        conversation = await conversation_repository.get(conversation_id)
-        return ConversationResponse(
-            id=conversation.id,
-            system_prompt=conversation.system_prompt,
-            user_id=conversation.user_id,
-            created_at=conversation.created_at,
-            messages=[],
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+    conversation = await conversation_authorizer.ensure_owner(
+        conversation_id, owner_sub
+    )
+
+    return ConversationResponse(
+        id=conversation.id,
+        system_prompt=conversation.system_prompt,
+        user_id=conversation.user_id,
+        created_at=conversation.created_at,
+        messages=[],
+    )
 
 
 @app.post("/conversations/{conversation_id}/chat")
 async def chat_with_conversation(
     conversation_id: str,
     chat_request: ChatRequest,
-    conversation_repository: ConversationRepositoryDep,
     openai_service: OpenAIServiceDep,
+    conversation_authorizer: ConversationAuthorizerDep,
+    owner_sub: AuthenticatedSubDep,
 ) -> ChatResponse:
     """
     Process a chat request with the full conversation history.
@@ -106,23 +122,15 @@ async def chat_with_conversation(
     This endpoint accepts the complete conversation history from the client
     and sends it to OpenAI for processing. Returns the AI assistant's response.
     """
-    logger.logger.info(f"New message in conversation ID: {conversation_id}")
+    conversation = await conversation_authorizer.ensure_owner(
+        conversation_id, owner_sub
+    )
 
-    try:
-        # Verify conversation exists and get system prompt
-        conversation = await conversation_repository.get(conversation_id)
+    response = await openai_service.process_chat_request(
+        system_prompt=conversation.system_prompt, chat_request=chat_request
+    )
 
-        # Process chat request with OpenAI
-        response = await openai_service.process_chat_request(
-            system_prompt=conversation.system_prompt, chat_request=chat_request
-        )
-
-        return response
-
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+    return response
 
 
 @app.get("/health")

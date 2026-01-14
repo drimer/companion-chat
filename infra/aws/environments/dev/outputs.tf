@@ -8,6 +8,16 @@ output "conversations_table_arn" {
   value       = module.db.conversations_table_arn
 }
 
+output "users_table_name" {
+  description = "Name of the DynamoDB users table"
+  value       = module.db.users_table_name
+}
+
+output "users_table_arn" {
+  description = "ARN of the DynamoDB users table"
+  value       = module.db.users_table_arn
+}
+
 output "lambda_function_name" {
   description = "Name of the conversations Lambda function"
   value       = module.conversations_lambda.lambda_function_name
@@ -36,4 +46,19 @@ output "api_gateway_url" {
 output "api_gateway_id" {
   description = "ID of the API Gateway"
   value       = module.api_gateway.api_gateway_id
+}
+
+output "cognito_user_pool_id" {
+  description = "ID of the Cognito user pool"
+  value       = module.cognito.user_pool_id
+}
+
+output "cognito_user_pool_arn" {
+  description = "ARN of the Cognito user pool"
+  value       = module.cognito.user_pool_arn
+}
+
+output "cognito_issuer_url" {
+  description = "Issuer URL of the Cognito user pool"
+  value       = module.cognito.issuer_url
 }

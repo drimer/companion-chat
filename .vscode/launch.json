@@ -12,7 +12,8 @@
             "args": [
                 "src.companionchat.main:app",
                 "--reload",
-                "--port", "4000"
+                "--port", "4000",
+                "--host", "0.0.0.0"
             ],
             "jinja": true,
             "envFile": "${workspaceFolder}/companion-chat/.env"

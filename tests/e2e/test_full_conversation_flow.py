@@ -9,16 +9,28 @@ import time
 import uuid
 
 import pytest
+from fastapi import Request
 from httpx import AsyncClient
 
+from companionchat.dependencies import get_authenticated_sub
 from companionchat.main import app
 
 
 @pytest.fixture
 async def async_client():
     """Create an async HTTP client for testing."""
-    async with AsyncClient(app=app, base_url="http://test") as client:
+
+    async def override_auth_sub(request: Request) -> str:
+        return request.headers.get("x-test-sub", "sub-a")
+
+    app.dependency_overrides[get_authenticated_sub] = override_auth_sub
+
+    async with AsyncClient(
+        app=app, base_url="http://test", headers={"x-test-sub": "sub-a"}
+    ) as client:
         yield client
+
+    app.dependency_overrides.pop(get_authenticated_sub, None)
 
 
 @pytest.mark.e2e
@@ -49,6 +61,13 @@ class TestFullConversationFlow:
         retrieved_data = get_response.json()
         assert retrieved_data["id"] == conversation_id
 
+        # Verify that a different user cannot access the conversation
+        other_user_headers = {"x-test-sub": "sub-b"}
+        forbidden_get = await async_client.get(
+            f"/conversations/{conversation_id}", headers=other_user_headers
+        )
+        assert forbidden_get.status_code == 403
+
         # Step 3: Start a conversation with initial message
         initial_chat_request = {
             "messages": [
@@ -71,6 +90,13 @@ class TestFullConversationFlow:
 
         ai_response = chat_data["message"]
         print(f"AI Response 1: {ai_response}")
+
+        forbidden_chat = await async_client.post(
+            f"/conversations/{conversation_id}/chat",
+            json=initial_chat_request,
+            headers=other_user_headers,
+        )
+        assert forbidden_chat.status_code == 403
 
         # Step 4: Continue the conversation with follow-up
         follow_up_request = {
@@ -310,6 +336,4 @@ class TestHealthAndMonitoring:
         assert response.status_code == 200
 
         data = response.json()
-        assert data["status"] == "healthy"
-        assert data["status"] == "healthy"
         assert data["status"] == "healthy"
