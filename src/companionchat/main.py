@@ -1,9 +1,6 @@
 import os
 from typing import Dict
 
-from fastapi import FastAPI, HTTPException, logger
-from mangum import Mangum
-
 from companionchat.dependencies import (
     AuthenticatedSubDep,
     ConversationAuthorizerDep,
@@ -16,12 +13,21 @@ from companionchat.schemas.conversations import (
     ChatResponse,
     ConversationResponse,
 )
-from companionchat.settings import configure_logging
+from companionchat.settings import configure_logging, get_settings
+from fastapi import FastAPI, HTTPException, logger
+from fastapi.middleware.cors import CORSMiddleware
+from mangum import Mangum
 
 app = FastAPI(
     title="Companion Chat API",
     description="API for managing conversations with your companion.",
     version="0.1.0",
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=get_settings().CORS_ORIGINS,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 configure_logging()
