@@ -3,8 +3,11 @@ from unittest.mock import AsyncMock
 from uuid import UUID
 
 import pytest
-
-from companionchat.db.repositories import DEFAULT_SYSTEM_PROMPT, ConversationRepository
+from companionchat.db.repositories import (
+    DEFAULT_CONVERSATION_TITLE,
+    DEFAULT_SYSTEM_PROMPT,
+    ConversationRepository,
+)
 
 OWNER_SUB = "user-sub-123"
 
@@ -26,6 +29,7 @@ async def test_create_conversation(repository, mock_dynamodb_client):
     conversation = await repository.create(OWNER_SUB)
 
     assert isinstance(conversation.id, UUID)
+    assert conversation.title == DEFAULT_CONVERSATION_TITLE
     assert conversation.system_prompt == DEFAULT_SYSTEM_PROMPT
     assert conversation.user_id == OWNER_SUB
     assert isinstance(conversation.created_at, datetime)
@@ -33,6 +37,7 @@ async def test_create_conversation(repository, mock_dynamodb_client):
     mock_dynamodb_client.put_item.assert_called_once()
     call_args = mock_dynamodb_client.put_item.call_args
     item = call_args[1]["Item"]
+    assert item["title"]["S"] == DEFAULT_CONVERSATION_TITLE
     assert item["system_prompt"]["S"] == DEFAULT_SYSTEM_PROMPT
     assert item["user_id"]["S"] == OWNER_SUB
 
@@ -45,6 +50,7 @@ async def test_get_conversation_success(repository, mock_dynamodb_client):
     mock_dynamodb_client.get_item.return_value = {
         "Item": {
             "id": {"S": conversation_id},
+            "title": {"S": DEFAULT_CONVERSATION_TITLE},
             "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
             "user_id": {"S": OWNER_SUB},
             "created_at": {"S": created_at.isoformat()},
@@ -89,6 +95,7 @@ async def test_list_for_user(repository, mock_dynamodb_client):
         "Items": [
             {
                 "id": {"S": "a1111111-b222-c333-d444-eeeeeeeeeeee"},
+                "title": {"S": DEFAULT_CONVERSATION_TITLE},
                 "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
                 "user_id": {"S": OWNER_SUB},
                 "created_at": {"S": created_at.isoformat()},
@@ -100,6 +107,7 @@ async def test_list_for_user(repository, mock_dynamodb_client):
 
     assert len(items) == 1
     assert items[0].user_id == OWNER_SUB
+    assert items[0].title == DEFAULT_CONVERSATION_TITLE
 
     mock_dynamodb_client.query.assert_called_once_with(
         TableName="test-table",
@@ -107,3 +115,58 @@ async def test_list_for_user(repository, mock_dynamodb_client):
         KeyConditionExpression="user_id = :owner",
         ExpressionAttributeValues={":owner": {"S": OWNER_SUB}},
     )
+
+
+@pytest.mark.asyncio
+async def test_list_for_user_follows_pagination(repository, mock_dynamodb_client):
+    first_key = {"id": {"S": "first-page-last-id"}, "user_id": {"S": OWNER_SUB}}
+    mock_dynamodb_client.query.side_effect = [
+        {
+            "Items": [
+                {
+                    "id": {"S": "a1111111-b222-c333-d444-eeeeeeeeeeee"},
+                    "title": {"S": DEFAULT_CONVERSATION_TITLE},
+                    "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
+                    "user_id": {"S": OWNER_SUB},
+                    "created_at": {"S": datetime.now(timezone.utc).isoformat()},
+                }
+            ],
+            "LastEvaluatedKey": first_key,
+        },
+        {
+            "Items": [
+                {
+                    "id": {"S": "b1111111-b222-c333-d444-eeeeeeeeeeee"},
+                    "title": {"S": "Second page"},
+                    "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
+                    "user_id": {"S": OWNER_SUB},
+                    "created_at": {"S": datetime.now(timezone.utc).isoformat()},
+                }
+            ]
+        },
+    ]
+
+    conversations = await repository.list_for_user(OWNER_SUB)
+
+    assert [str(conversation.id) for conversation in conversations] == [
+        "a1111111-b222-c333-d444-eeeeeeeeeeee",
+        "b1111111-b222-c333-d444-eeeeeeeeeeee",
+    ]
+    assert conversations[1].title == "Second page"
+    assert mock_dynamodb_client.query.await_count == 2
+    assert mock_dynamodb_client.query.await_args_list[1].kwargs[
+        "ExclusiveStartKey"
+    ] == first_key
+
+
+def test_deserialize_legacy_conversation_without_title(repository):
+    conversation = repository._deserialize_conversation(
+        {
+            "id": {"S": "a1111111-b222-c333-d444-eeeeeeeeeeee"},
+            "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
+            "user_id": {"S": OWNER_SUB},
+            "created_at": {"S": datetime.now(timezone.utc).isoformat()},
+        }
+    )
+
+    assert conversation.title == DEFAULT_CONVERSATION_TITLE

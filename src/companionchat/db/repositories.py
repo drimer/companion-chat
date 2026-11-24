@@ -1,15 +1,15 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Optional, Union
+from typing import Any, Mapping
 from uuid import UUID, uuid4
 
+from companionchat.db.models import Conversation
 from fastapi import logger
 from types_aiobotocore_dynamodb import DynamoDBClient
 
-from companionchat.db.models import Conversation
-
 # Hardcoded constants for now
+DEFAULT_CONVERSATION_TITLE = "The Wobbly Noodle Chat"
 DEFAULT_SYSTEM_PROMPT = """
 You must act as a Japanese language teacher who is pretending to be in a real-life, day-to-day scenario with me, so that I can practice talking in Japanese.
 
@@ -45,7 +45,7 @@ Example:
 
 *Greeting*: いらっしゃいませ！お名前は何ですか？
 
-*Vocabulary used with Kanji*: 
+*Vocabulary used with Kanji*:
 - 名前 (なまえ) - name
 - 何 (なん) - what
 
@@ -62,7 +62,7 @@ Example:
 
 お客様の名前は田中さんですね。お部屋はこちらです。
 
-*Vocabulary used with Kanji*: 
+*Vocabulary used with Kanji*:
 - 名前 (なまえ) - name
 - 客様 (きゃくさま) - guest
 - 部屋 (へや) - room
@@ -83,6 +83,7 @@ class ConversationRepository:
                 TableName=self.table_name,
                 Item={
                     "id": {"S": str(conversation_id)},
+                    "title": {"S": DEFAULT_CONVERSATION_TITLE},
                     "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
                     "user_id": {"S": owner_sub},
                     "created_at": {"S": created_at.isoformat()},
@@ -94,6 +95,7 @@ class ConversationRepository:
             )
             return Conversation(
                 id=conversation_id,
+                title=DEFAULT_CONVERSATION_TITLE,
                 system_prompt=DEFAULT_SYSTEM_PROMPT,
                 user_id=owner_sub,
                 created_at=created_at,
@@ -101,7 +103,7 @@ class ConversationRepository:
         except Exception as e:
             raise Exception(f"Error creating conversation: {e}")
 
-    async def get(self, conversation_id: Union[str, UUID]) -> Optional[Conversation]:
+    async def get(self, conversation_id: str | UUID) -> Conversation | None:
         try:
             # Convert UUID to string if necessary
             id_str = str(conversation_id)
@@ -120,22 +122,38 @@ class ConversationRepository:
 
     async def list_for_user(self, owner_sub: str) -> list[Conversation]:
         try:
-            response = await self.client.query(
-                TableName=self.table_name,
-                IndexName="user_id-index",
-                KeyConditionExpression="user_id = :owner",
-                ExpressionAttributeValues={":owner": {"S": owner_sub}},
-            )
+            items: list[Mapping[str, Any]] = []
+            last_evaluated_key: Any = None
+            while True:
+                if last_evaluated_key:
+                    response = await self.client.query(
+                        TableName=self.table_name,
+                        IndexName="user_id-index",
+                        KeyConditionExpression="user_id = :owner",
+                        ExpressionAttributeValues={":owner": {"S": owner_sub}},
+                        ExclusiveStartKey=last_evaluated_key,
+                    )
+                else:
+                    response = await self.client.query(
+                        TableName=self.table_name,
+                        IndexName="user_id-index",
+                        KeyConditionExpression="user_id = :owner",
+                        ExpressionAttributeValues={":owner": {"S": owner_sub}},
+                    )
+                items.extend(response.get("Items", []))
+                last_evaluated_key = response.get("LastEvaluatedKey")
+                if not last_evaluated_key:
+                    break
 
-            items = response.get("Items", [])
             return [self._deserialize_conversation(item) for item in items]
         except Exception as e:
             raise Exception(f"Error listing conversations for user: {e}")
 
     @staticmethod
-    def _deserialize_conversation(item: dict[str, dict[str, str]]) -> Conversation:
+    def _deserialize_conversation(item: Mapping[str, Any]) -> Conversation:
         return Conversation(
             id=UUID(item["id"]["S"]),
+            title=item.get("title", {}).get("S", DEFAULT_CONVERSATION_TITLE),
             system_prompt=item["system_prompt"]["S"],
             user_id=item["user_id"]["S"],
             created_at=datetime.fromisoformat(item["created_at"]["S"]),

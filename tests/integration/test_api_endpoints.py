@@ -71,6 +71,32 @@ async def async_client(
 class TestConversationEndpoints:
     """Test conversation CRUD endpoints."""
 
+    async def test_list_conversations_for_authenticated_user(
+        self, async_client, mock_conversation_repository
+    ):
+        conversations = []
+        for conversation_id, title in (
+            (str(uuid.uuid4()), "The Wobbly Noodle Chat"),
+            (str(uuid.uuid4()), "Another Silly Title"),
+        ):
+            conversation = MagicMock()
+            conversation.id = conversation_id
+            conversation.title = title
+            conversations.append(conversation)
+
+        mock_conversation_repository.list_for_user.return_value = conversations
+
+        response = await async_client.get("/conversations")
+
+        assert response.status_code == 200
+        data = response.json()
+        assert data == [
+            {"id": conversation.id, "title": conversation.title}
+            for conversation in conversations
+        ]
+        assert all(set(conversation) == {"id", "title"} for conversation in data)
+        mock_conversation_repository.list_for_user.assert_awaited_once_with(AUTH_SUB)
+
     async def test_cors_allows_configured_origin(self, async_client):
         response = await async_client.get(
             "/health", headers={"Origin": "http://localhost:4000"}
@@ -116,6 +142,7 @@ class TestConversationEndpoints:
         conversation_id = str(uuid.uuid4())
         mock_conversation = MagicMock()
         mock_conversation.id = conversation_id
+        mock_conversation.title = "The Wobbly Noodle Chat"
         mock_conversation.system_prompt = "You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak."
         mock_conversation.user_id = AUTH_SUB
         mock_conversation.created_at = datetime.now()
@@ -133,6 +160,7 @@ class TestConversationEndpoints:
         assert response.status_code == 201
         data = response.json()
         assert data["id"] == conversation_id  # Should match mock
+        assert data["title"] == mock_conversation.title
         assert data["system_prompt"] == mock_conversation.system_prompt
         assert data["user_id"] == mock_conversation.user_id
         assert "created_at" in data
@@ -158,6 +186,7 @@ class TestConversationEndpoints:
         conversation_id = str(uuid.uuid4())
         mock_conversation = MagicMock()
         mock_conversation.id = conversation_id
+        mock_conversation.title = "The Wobbly Noodle Chat"
         mock_conversation.system_prompt = "You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak."
         mock_conversation.user_id = AUTH_SUB
         mock_conversation.created_at = datetime.now()
@@ -171,6 +200,7 @@ class TestConversationEndpoints:
         assert response.status_code == 200
         data = response.json()
         assert data["id"] == conversation_id
+        assert data["title"] == mock_conversation.title
         assert "system_prompt" in data
         assert "user_id" in data
         assert "created_at" in data
@@ -206,6 +236,7 @@ class TestConversationEndpoints:
         conversation_id = str(uuid.uuid4())
         mock_conversation = MagicMock()
         mock_conversation.id = conversation_id
+        mock_conversation.title = "The Wobbly Noodle Chat"
         mock_conversation.system_prompt = "Prompt"
         mock_conversation.user_id = "other-user"
         mock_conversation.created_at = datetime.now()

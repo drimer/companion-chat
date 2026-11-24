@@ -20,10 +20,31 @@ curl -X POST "http://localhost:4000/conversations" \
 ```json
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
+  "title": "The Wobbly Noodle Chat",
   "system_prompt": "You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak.",
   "user_id": "test-user-001",
   "created_at": "2025-08-15T10:30:00Z"
 }
+```
+
+## List Conversations
+
+Returns all conversations belonging to the authenticated user. Each list item
+contains only its ID and title.
+
+```bash
+curl "http://localhost:4000/conversations" \
+  -H "Authorization: ******"
+```
+
+**Response**:
+```json
+[
+  {
+    "id": "123e4567-e89b-12d3-a456-426614174000",
+    "title": "The Wobbly Noodle Chat"
+  }
+]
 ```
 
 ## Chat with OpenAI
