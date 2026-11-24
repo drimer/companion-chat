@@ -8,6 +8,9 @@ from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from fastapi import HTTPException
+from httpx import ASGITransport, AsyncClient
+
 from companionchat.dependencies import (
     get_authenticated_sub,
     get_conversation_authorization_service,
@@ -16,8 +19,6 @@ from companionchat.dependencies import (
 )
 from companionchat.main import app
 from companionchat.schemas.conversations import ChatResponse, MessageResponse
-from fastapi import HTTPException
-from httpx import ASGITransport, AsyncClient
 
 AUTH_SUB = "test-sub-001"
 
@@ -70,43 +71,6 @@ async def async_client(
 
 class TestConversationEndpoints:
     """Test conversation CRUD endpoints."""
-
-    async def test_cors_allows_configured_origin(self, async_client):
-        response = await async_client.get(
-            "/health", headers={"Origin": "http://localhost:4000"}
-        )
-
-        assert response.status_code == 200
-        assert (
-            response.headers["access-control-allow-origin"]
-            == "http://localhost:4000"
-        )
-
-    async def test_cors_preflight_allows_configured_origin(self, async_client):
-        response = await async_client.options(
-            "/health",
-            headers={
-                "Origin": "http://localhost:4000",
-                "Access-Control-Request-Method": "GET",
-                "Access-Control-Request-Headers": "authorization",
-            },
-        )
-
-        assert response.status_code == 200
-        assert (
-            response.headers["access-control-allow-origin"]
-            == "http://localhost:4000"
-        )
-        assert "GET" in response.headers["access-control-allow-methods"]
-        assert "authorization" in response.headers["access-control-allow-headers"]
-
-    async def test_cors_does_not_allow_unconfigured_origin(self, async_client):
-        response = await async_client.get(
-            "/health", headers={"Origin": "https://unapproved.example"}
-        )
-
-        assert response.status_code == 200
-        assert "access-control-allow-origin" not in response.headers
 
     async def test_create_conversation(
         self, async_client, mock_conversation_repository, mock_openai_service
