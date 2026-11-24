@@ -153,7 +153,6 @@ resource "aws_api_gateway_method_settings" "main" {
   }
 }
 
-# CORS support for root resource
 resource "aws_api_gateway_method" "proxy_root" {
   rest_api_id   = aws_api_gateway_rest_api.main.id
   resource_id   = aws_api_gateway_rest_api.main.root_resource_id
@@ -176,6 +175,14 @@ resource "aws_api_gateway_integration" "lambda_root" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = "arn:aws:apigateway:${data.aws_region.current.name}:lambda:path/2015-03-31/functions/${var.lambda_function_arn}/invocations"
+}
+
+# CORS support for proxy resource
+resource "aws_api_gateway_method" "options_root" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_method.proxy_root.resource_id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
 }
 
 # resource "aws_api_gateway_method_response" "proxy_options" {
