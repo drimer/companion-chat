@@ -45,3 +45,9 @@ variable "enable_execution_logs" {
     description = "Whether to enable detailed execution logs (data trace)"
     default     = true
 }
+
+variable "cors_origins" {
+    type        = string
+    description = "List of allowed origins for CORS"
+    default     = "*"
+}
