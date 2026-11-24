@@ -39,6 +39,15 @@ resource "aws_iam_policy" "conversations_lambda_policy" {
       {
         "Effect": "Allow",
         "Action": [
+          "dynamodb:Query"
+        ],
+        "Resource": [
+          "${var.db_conversations_table_arn}/index/user_id-index"
+        ]
+      },
+      {
+        "Effect": "Allow",
+        "Action": [
           "s3:GetObject"
         ],
         "Resource": [
