@@ -178,22 +178,15 @@ resource "aws_api_gateway_integration" "lambda_root" {
 }
 
 # CORS support for proxy resource
-resource "aws_api_gateway_method" "options_root" {
-  rest_api_id   = aws_api_gateway_rest_api.main.id
-  resource_id = aws_api_gateway_method.proxy_root.resource_id
-  http_method   = "OPTIONS"
-  authorization = "NONE"
+resource "aws_api_gateway_method_response" "proxy_options" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  resource_id = aws_api_gateway_resource.proxy.id
+  http_method = "OPTIONS"
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
 }
-
-# resource "aws_api_gateway_method_response" "proxy_options" {
-#   rest_api_id = aws_api_gateway_rest_api.main.id
-#   resource_id = aws_api_gateway_resource.proxy.id
-#   http_method = aws_api_gateway_method.proxy_options.http_method
-#   status_code = "200"
-
-#   response_parameters = {
-#     "method.response.header.Access-Control-Allow-Headers" = true
-#     "method.response.header.Access-Control-Allow-Methods" = true
-#     "method.response.header.Access-Control-Allow-Origin"  = true
-#   }
-# }
