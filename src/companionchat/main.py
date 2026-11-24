@@ -15,7 +15,7 @@ from companionchat.schemas.conversations import (
     ConversationSummary,
 )
 from companionchat.settings import configure_logging, get_settings
-from fastapi import FastAPI, HTTPException, logger
+from fastapi import FastAPI, HTTPException, Response, logger, status
 from fastapi.middleware.cors import CORSMiddleware
 from mangum import Mangum
 
@@ -128,6 +128,22 @@ async def get_conversation(
         created_at=conversation.created_at,
         messages=[],
     )
+
+
+@app.delete(
+    "/conversations/{conversation_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_conversation(
+    conversation_id: str,
+    conversation_repository: ConversationRepositoryDep,
+    conversation_authorizer: ConversationAuthorizerDep,
+    owner_sub: AuthenticatedSubDep,
+) -> Response:
+    """Delete a conversation owned by the authenticated user."""
+    await conversation_authorizer.ensure_owner(conversation_id, owner_sub)
+    await conversation_repository.delete(conversation_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.post("/conversations/{conversation_id}/chat")

@@ -119,6 +119,15 @@ class ConversationRepository:
         except Exception as e:
             raise Exception(f"Error retrieving conversation: {e}")
 
+    async def delete(self, conversation_id: str | UUID) -> None:
+        try:
+            await self.client.delete_item(
+                TableName=self.table_name,
+                Key={"id": {"S": str(conversation_id)}},
+            )
+        except Exception as e:
+            raise Exception(f"Error deleting conversation: {e}")
+
     async def list_for_user(self, owner_sub: str) -> list[Conversation]:
         try:
             items: list[Mapping[str, Any]] = []

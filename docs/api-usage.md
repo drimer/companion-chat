@@ -82,6 +82,17 @@ curl "http://localhost:4000/conversations/{conversation_id}" \
   -H "Authorization: Bearer ${ACCESS_TOKEN}"
 ```
 
+## Delete a Conversation
+
+Deletes a conversation belonging to the authenticated user. Returns `204 No
+Content` on success; returns `404` if it does not exist and `403` if another
+user owns it.
+
+```bash
+curl -X DELETE "http://localhost:4000/conversations/{conversation_id}" \
+  -H "Authorization: ******"
+```
+
 ## Production API Testing
 
 For testing the deployed AWS API Gateway:

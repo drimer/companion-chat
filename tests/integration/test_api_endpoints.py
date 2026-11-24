@@ -250,6 +250,58 @@ class TestConversationEndpoints:
         assert response.status_code == 403
         assert response.json()["detail"] == "Forbidden"
 
+    async def test_delete_conversation(
+        self,
+        async_client,
+        mock_conversation_repository,
+        mock_conversation_authorizer,
+    ):
+        conversation_id = str(uuid.uuid4())
+        mock_conversation_authorizer.ensure_owner.return_value = MagicMock()
+
+        response = await async_client.delete(f"/conversations/{conversation_id}")
+
+        assert response.status_code == 204
+        assert response.content == b""
+        mock_conversation_authorizer.ensure_owner.assert_awaited_once_with(
+            conversation_id, AUTH_SUB
+        )
+        mock_conversation_repository.delete.assert_awaited_once_with(conversation_id)
+
+    async def test_delete_nonexistent_conversation(
+        self,
+        async_client,
+        mock_conversation_repository,
+        mock_conversation_authorizer,
+    ):
+        conversation_id = str(uuid.uuid4())
+        mock_conversation_authorizer.ensure_owner.side_effect = HTTPException(
+            status_code=404, detail="Conversation not found"
+        )
+
+        response = await async_client.delete(f"/conversations/{conversation_id}")
+
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Conversation not found"
+        mock_conversation_repository.delete.assert_not_awaited()
+
+    async def test_delete_conversation_forbidden(
+        self,
+        async_client,
+        mock_conversation_repository,
+        mock_conversation_authorizer,
+    ):
+        conversation_id = str(uuid.uuid4())
+        mock_conversation_authorizer.ensure_owner.side_effect = HTTPException(
+            status_code=403, detail="Forbidden"
+        )
+
+        response = await async_client.delete(f"/conversations/{conversation_id}")
+
+        assert response.status_code == 403
+        assert response.json()["detail"] == "Forbidden"
+        mock_conversation_repository.delete.assert_not_awaited()
+
 
 class TestChatEndpoint:
     """Test the chat endpoint with OpenAI integration."""

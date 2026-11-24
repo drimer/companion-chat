@@ -80,6 +80,7 @@ bash test-events/api-gateway-examples.sh
 
 - `POST /conversations` - Create new conversation
 - `GET /conversations` - List the authenticated user's conversations (ID and title)
+- `DELETE /conversations/{id}` - Delete an owned conversation
 - `POST /conversations/{id}/chat` - Send chat message
 - `GET /conversations/{id}` - Get conversation details
 - `GET /health` - Health check

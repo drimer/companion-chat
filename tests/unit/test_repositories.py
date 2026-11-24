@@ -90,6 +90,27 @@ async def test_get_conversation_error(repository, mock_dynamodb_client):
 
 
 @pytest.mark.asyncio
+async def test_delete_conversation(repository, mock_dynamodb_client):
+    conversation_id = "550e8400-e29b-41d4-a716-446655440000"
+    mock_dynamodb_client.delete_item.return_value = {}
+
+    await repository.delete(conversation_id)
+
+    mock_dynamodb_client.delete_item.assert_awaited_once_with(
+        TableName="test-table",
+        Key={"id": {"S": conversation_id}},
+    )
+
+
+@pytest.mark.asyncio
+async def test_delete_conversation_error(repository, mock_dynamodb_client):
+    mock_dynamodb_client.delete_item.side_effect = Exception("DynamoDB error")
+
+    with pytest.raises(Exception, match="Error deleting conversation"):
+        await repository.delete("test-id")
+
+
+@pytest.mark.asyncio
 async def test_list_for_user(repository, mock_dynamodb_client):
     created_at = datetime.now(timezone.utc)
     mock_dynamodb_client.query.return_value = {
