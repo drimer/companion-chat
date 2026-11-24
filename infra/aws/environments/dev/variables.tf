@@ -30,5 +30,5 @@ variable "cognito_domain_prefix" {
 variable "cors_origins" {
     description = "List of allowed CORS origins"
     type        = list(string)
-    default     = []
+    default     = ""
 }

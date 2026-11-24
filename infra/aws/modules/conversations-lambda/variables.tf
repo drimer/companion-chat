@@ -74,5 +74,5 @@ variable "openai_api_key" {
 variable "cors_origins" {
     description = "List of allowed CORS origins"
     type        = string
-    default     = []
+    default     = ""
 }
