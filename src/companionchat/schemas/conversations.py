@@ -38,6 +38,11 @@ class BaseConversation(BaseModel):
     """
 
     id: UUID = Field(..., description="The unique identifier for the conversation.")
+    title: str = Field(..., description="The title of the conversation.")
+
+
+class ConversationSummary(BaseConversation):
+    """A conversation's ID and title for list responses."""
 
 
 class ConversationCreateRequest(BaseModel):
@@ -55,6 +60,7 @@ class ConversationResponse(BaseConversation):
     """
 
     id: UUID = Field(..., description="The unique identifier for the conversation.")
+    title: str = Field(..., description="The title of the conversation.")
     system_prompt: str = Field(
         ..., description="The system prompt for the conversation."
     )

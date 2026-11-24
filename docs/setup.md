@@ -41,8 +41,23 @@ docker-compose -f ./infra/docker-compose.yml up -d
 ```bash
 aws dynamodb create-table \
   --table-name conversations \
-  --attribute-definitions AttributeName=id,AttributeType=S \
+  --attribute-definitions \
+    AttributeName=id,AttributeType=S \
+    AttributeName=user_id,AttributeType=S \
   --key-schema AttributeName=id,KeyType=HASH \
+  --global-secondary-indexes '[
+    {
+      "IndexName": "user_id-index",
+      "KeySchema": [
+        {"AttributeName": "user_id", "KeyType": "HASH"}
+      ],
+      "Projection": {"ProjectionType": "ALL"},
+      "ProvisionedThroughput": {
+        "ReadCapacityUnits": 1,
+        "WriteCapacityUnits": 1
+      }
+    }
+  ]' \
   --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
   --table-class STANDARD \
   --endpoint-url http://localhost:8000

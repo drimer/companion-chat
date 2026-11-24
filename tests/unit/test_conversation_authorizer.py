@@ -3,18 +3,18 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
-from fastapi import HTTPException
-
 from companionchat.authorization.conversation_authorizer import (
     ConversationAuthorizationService,
 )
 from companionchat.db.models import Conversation
+from fastapi import HTTPException
 
 
 @pytest.mark.asyncio
 async def test_ensure_owner_returns_conversation_for_owner():
     conversation = Conversation(
         id=uuid4(),
+        title="Test conversation",
         system_prompt="prompt",
         user_id="owner-sub",
         created_at=datetime.now(timezone.utc),
@@ -34,6 +34,7 @@ async def test_ensure_owner_returns_conversation_for_owner():
 async def test_ensure_owner_raises_for_different_user():
     conversation = Conversation(
         id=uuid4(),
+        title="Test conversation",
         system_prompt="prompt",
         user_id="owner-sub",
         created_at=datetime.now(timezone.utc),

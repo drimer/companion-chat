@@ -79,6 +79,7 @@ bash test-events/api-gateway-examples.sh
 ## API Endpoints
 
 - `POST /conversations` - Create new conversation
+- `GET /conversations` - List the authenticated user's conversations (ID and title)
 - `POST /conversations/{id}/chat` - Send chat message
 - `GET /conversations/{id}` - Get conversation details
 - `GET /health` - Health check

@@ -6,6 +6,7 @@ from companionchat.schemas.conversations import (
     ChatResponse,
     ConversationCreateRequest,
     ConversationResponse,
+    ConversationSummary,
     MessageHistory,
     MessageResponse,
 )
@@ -24,6 +25,7 @@ def test_conversation_response():
 
     response = ConversationResponse(
         id=conversation_id,
+        title="Test conversation",
         system_prompt="Test system prompt",
         user_id="test-user",
         created_at=created_at,
@@ -31,11 +33,18 @@ def test_conversation_response():
     )
 
     assert response.id == conversation_id
+    assert response.title == "Test conversation"
     assert response.system_prompt == "Test system prompt"
     assert response.user_id == "test-user"
     assert response.created_at == created_at
     assert response.messages[0].role == "assistant"
     assert response.messages[0].content == "Hello there!"
+
+
+def test_conversation_summary_only_contains_id_and_title():
+    summary = ConversationSummary(id=uuid4(), title="Test conversation")
+
+    assert set(summary.model_dump()) == {"id", "title"}
 
 
 def test_message_history():

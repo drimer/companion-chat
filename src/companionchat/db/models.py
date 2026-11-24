@@ -12,6 +12,7 @@ class Message:
 @dataclass
 class Conversation:
     id: UUID
+    title: str
     system_prompt: str
     user_id: str
     created_at: datetime

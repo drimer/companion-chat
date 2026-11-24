@@ -12,6 +12,7 @@ from companionchat.schemas.conversations import (
     ChatRequest,
     ChatResponse,
     ConversationResponse,
+    ConversationSummary,
 )
 from companionchat.settings import configure_logging, get_settings
 from fastapi import FastAPI, HTTPException, logger
@@ -77,6 +78,7 @@ async def create_conversation(
 
     response = ConversationResponse(
         id=conversation.id,
+        title=conversation.title,
         system_prompt=conversation.system_prompt,
         user_id=conversation.user_id,
         created_at=conversation.created_at,
@@ -84,6 +86,19 @@ async def create_conversation(
     )
 
     return response
+
+
+@app.get("/conversations", response_model=list[ConversationSummary])
+async def list_conversations(
+    conversation_repository: ConversationRepositoryDep,
+    owner_sub: AuthenticatedSubDep,
+) -> list[ConversationSummary]:
+    """List the authenticated user's conversations by ID and title."""
+    conversations = await conversation_repository.list_for_user(owner_sub)
+    return [
+        ConversationSummary(id=conversation.id, title=conversation.title)
+        for conversation in conversations
+    ]
 
 
 @app.get("/conversations/{conversation_id}")
@@ -107,6 +122,7 @@ async def get_conversation(
 
     return ConversationResponse(
         id=conversation.id,
+        title=conversation.title,
         system_prompt=conversation.system_prompt,
         user_id=conversation.user_id,
         created_at=conversation.created_at,
