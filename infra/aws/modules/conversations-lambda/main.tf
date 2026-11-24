@@ -89,6 +89,7 @@ resource "aws_lambda_function" "conversations" {
       OPENAI_API_KEY = var.openai_api_key
       OPENAI_MODEL = var.openai_model
       MAX_TOKENS = var.max_tokens
+      CORS_ORIGINS = var.cors_origins
     }
   }
 }

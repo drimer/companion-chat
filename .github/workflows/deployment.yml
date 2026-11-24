@@ -64,4 +64,5 @@ jobs:
           AWS_REGION: eu-west-2
           AWS_DEFAULT_REGION: eu-west-2
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CORS_ORIGINS: ${{ vars.CORS_ORIGINS }}
         

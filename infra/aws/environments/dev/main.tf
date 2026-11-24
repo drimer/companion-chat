@@ -68,6 +68,7 @@ module "conversations_lambda" {
     openai_model = "gpt-4o-mini"
     max_tokens = "1000"
     openai_api_key = var.openai_api_key
+    cors_origins = var.cors_origins
 }
 
 module "api_gateway" {

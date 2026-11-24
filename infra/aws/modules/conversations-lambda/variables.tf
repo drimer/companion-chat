@@ -70,3 +70,9 @@ variable "openai_api_key" {
     type = string
     description = "The OpenAI API key for making API calls to OpenAI"
 }
+
+variable "cors_origins" {
+    description = "List of allowed CORS origins"
+    type        = string
+    default     = []
+}
