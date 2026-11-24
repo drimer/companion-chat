@@ -200,7 +200,7 @@ resource "aws_api_gateway_integration" "cors_integration" {
   }
 }
 
-resource "aws_api_gateway_ingegration_response" "cors_integration_response" {
+resource "aws_api_gateway_integration_response" "cors_integration_response" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   resource_id = aws_api_gateway_resource.proxy.id
   http_method = aws_api_gateway_method.cors_options.http_method
