@@ -8,8 +8,6 @@ from companionchat.db.models import Conversation
 from fastapi import logger
 from types_aiobotocore_dynamodb import DynamoDBClient
 
-# Hardcoded constants for now
-DEFAULT_CONVERSATION_TITLE = "The Wobbly Noodle Chat"
 DEFAULT_SYSTEM_PROMPT = """
 You must act as a Japanese language teacher who is pretending to be in a real-life, day-to-day scenario with me, so that I can practice talking in Japanese.
 
@@ -78,12 +76,13 @@ class ConversationRepository:
         try:
             conversation_id = uuid4()
             created_at = datetime.now(timezone.utc)
+            title = created_at.strftime("%Y-%m-%d at %H:%M:%S")
 
             await self.client.put_item(
                 TableName=self.table_name,
                 Item={
                     "id": {"S": str(conversation_id)},
-                    "title": {"S": DEFAULT_CONVERSATION_TITLE},
+                    "title": {"S": title},
                     "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
                     "user_id": {"S": owner_sub},
                     "created_at": {"S": created_at.isoformat()},
@@ -95,7 +94,7 @@ class ConversationRepository:
             )
             return Conversation(
                 id=conversation_id,
-                title=DEFAULT_CONVERSATION_TITLE,
+                title=title,
                 system_prompt=DEFAULT_SYSTEM_PROMPT,
                 user_id=owner_sub,
                 created_at=created_at,
@@ -153,7 +152,7 @@ class ConversationRepository:
     def _deserialize_conversation(item: Mapping[str, Any]) -> Conversation:
         return Conversation(
             id=UUID(item["id"]["S"]),
-            title=item.get("title", {}).get("S", DEFAULT_CONVERSATION_TITLE),
+            title=item.get("title", {}).get("S", ""),
             system_prompt=item["system_prompt"]["S"],
             user_id=item["user_id"]["S"],
             created_at=datetime.fromisoformat(item["created_at"]["S"]),

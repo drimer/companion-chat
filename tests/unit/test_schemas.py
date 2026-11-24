@@ -42,9 +42,10 @@ def test_conversation_response():
 
 
 def test_conversation_summary_only_contains_id_and_title():
-    summary = ConversationSummary(id=uuid4(), title="Test conversation")
+    summary = ConversationSummary(id=uuid4(), title="")
 
     assert set(summary.model_dump()) == {"id", "title"}
+    assert summary.title == ""
 
 
 def test_message_history():

@@ -4,7 +4,6 @@ from uuid import UUID
 
 import pytest
 from companionchat.db.repositories import (
-    DEFAULT_CONVERSATION_TITLE,
     DEFAULT_SYSTEM_PROMPT,
     ConversationRepository,
 )
@@ -29,7 +28,9 @@ async def test_create_conversation(repository, mock_dynamodb_client):
     conversation = await repository.create(OWNER_SUB)
 
     assert isinstance(conversation.id, UUID)
-    assert conversation.title == DEFAULT_CONVERSATION_TITLE
+    assert conversation.title == conversation.created_at.strftime(
+        "%Y-%m-%d at %H:%M:%S"
+    )
     assert conversation.system_prompt == DEFAULT_SYSTEM_PROMPT
     assert conversation.user_id == OWNER_SUB
     assert isinstance(conversation.created_at, datetime)
@@ -37,7 +38,7 @@ async def test_create_conversation(repository, mock_dynamodb_client):
     mock_dynamodb_client.put_item.assert_called_once()
     call_args = mock_dynamodb_client.put_item.call_args
     item = call_args[1]["Item"]
-    assert item["title"]["S"] == DEFAULT_CONVERSATION_TITLE
+    assert item["title"]["S"] == conversation.title
     assert item["system_prompt"]["S"] == DEFAULT_SYSTEM_PROMPT
     assert item["user_id"]["S"] == OWNER_SUB
 
@@ -50,7 +51,7 @@ async def test_get_conversation_success(repository, mock_dynamodb_client):
     mock_dynamodb_client.get_item.return_value = {
         "Item": {
             "id": {"S": conversation_id},
-            "title": {"S": DEFAULT_CONVERSATION_TITLE},
+            "title": {"S": "2026-11-24 at 15:00:00"},
             "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
             "user_id": {"S": OWNER_SUB},
             "created_at": {"S": created_at.isoformat()},
@@ -95,7 +96,7 @@ async def test_list_for_user(repository, mock_dynamodb_client):
         "Items": [
             {
                 "id": {"S": "a1111111-b222-c333-d444-eeeeeeeeeeee"},
-                "title": {"S": DEFAULT_CONVERSATION_TITLE},
+                "title": {"S": "2026-11-24 at 15:00:00"},
                 "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
                 "user_id": {"S": OWNER_SUB},
                 "created_at": {"S": created_at.isoformat()},
@@ -107,7 +108,7 @@ async def test_list_for_user(repository, mock_dynamodb_client):
 
     assert len(items) == 1
     assert items[0].user_id == OWNER_SUB
-    assert items[0].title == DEFAULT_CONVERSATION_TITLE
+    assert items[0].title == "2026-11-24 at 15:00:00"
 
     mock_dynamodb_client.query.assert_called_once_with(
         TableName="test-table",
@@ -125,7 +126,7 @@ async def test_list_for_user_follows_pagination(repository, mock_dynamodb_client
             "Items": [
                 {
                     "id": {"S": "a1111111-b222-c333-d444-eeeeeeeeeeee"},
-                    "title": {"S": DEFAULT_CONVERSATION_TITLE},
+                    "title": {"S": "2026-11-24 at 15:00:00"},
                     "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
                     "user_id": {"S": OWNER_SUB},
                     "created_at": {"S": datetime.now(timezone.utc).isoformat()},
@@ -159,7 +160,7 @@ async def test_list_for_user_follows_pagination(repository, mock_dynamodb_client
     ] == first_key
 
 
-def test_deserialize_legacy_conversation_without_title(repository):
+def test_deserialize_conversation_without_title(repository):
     conversation = repository._deserialize_conversation(
         {
             "id": {"S": "a1111111-b222-c333-d444-eeeeeeeeeeee"},
@@ -169,4 +170,18 @@ def test_deserialize_legacy_conversation_without_title(repository):
         }
     )
 
-    assert conversation.title == DEFAULT_CONVERSATION_TITLE
+    assert conversation.title == ""
+
+
+def test_deserialize_conversation_with_empty_title(repository):
+    conversation = repository._deserialize_conversation(
+        {
+            "id": {"S": "a1111111-b222-c333-d444-eeeeeeeeeeee"},
+            "title": {"S": ""},
+            "system_prompt": {"S": DEFAULT_SYSTEM_PROMPT},
+            "user_id": {"S": OWNER_SUB},
+            "created_at": {"S": datetime.now(timezone.utc).isoformat()},
+        }
+    )
+
+    assert conversation.title == ""

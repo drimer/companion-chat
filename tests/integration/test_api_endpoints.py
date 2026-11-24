@@ -76,7 +76,7 @@ class TestConversationEndpoints:
     ):
         conversations = []
         for conversation_id, title in (
-            (str(uuid.uuid4()), "The Wobbly Noodle Chat"),
+            (str(uuid.uuid4()), "A user-defined title"),
             (str(uuid.uuid4()), "Another Silly Title"),
         ):
             conversation = MagicMock()
@@ -142,7 +142,7 @@ class TestConversationEndpoints:
         conversation_id = str(uuid.uuid4())
         mock_conversation = MagicMock()
         mock_conversation.id = conversation_id
-        mock_conversation.title = "The Wobbly Noodle Chat"
+        mock_conversation.title = "A user-defined title"
         mock_conversation.system_prompt = "You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak."
         mock_conversation.user_id = AUTH_SUB
         mock_conversation.created_at = datetime.now()
@@ -186,7 +186,7 @@ class TestConversationEndpoints:
         conversation_id = str(uuid.uuid4())
         mock_conversation = MagicMock()
         mock_conversation.id = conversation_id
-        mock_conversation.title = "The Wobbly Noodle Chat"
+        mock_conversation.title = "A user-defined title"
         mock_conversation.system_prompt = "You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak."
         mock_conversation.user_id = AUTH_SUB
         mock_conversation.created_at = datetime.now()
@@ -236,7 +236,7 @@ class TestConversationEndpoints:
         conversation_id = str(uuid.uuid4())
         mock_conversation = MagicMock()
         mock_conversation.id = conversation_id
-        mock_conversation.title = "The Wobbly Noodle Chat"
+        mock_conversation.title = "A user-defined title"
         mock_conversation.system_prompt = "Prompt"
         mock_conversation.user_id = "other-user"
         mock_conversation.created_at = datetime.now()

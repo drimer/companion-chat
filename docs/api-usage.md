@@ -20,10 +20,10 @@ curl -X POST "http://localhost:4000/conversations" \
 ```json
 {
   "id": "123e4567-e89b-12d3-a456-426614174000",
-  "title": "The Wobbly Noodle Chat",
+  "title": "2026-11-24 at 15:30:45",
   "system_prompt": "You are a language exchange student who speaks Japanese natively and wants to learn English. I am learning Japanese, and will help you improve your English as we speak.",
   "user_id": "test-user-001",
-  "created_at": "2025-08-15T10:30:00Z"
+  "created_at": "2026-11-24T15:30:45+00:00"
 }
 ```
 
@@ -42,7 +42,7 @@ curl "http://localhost:4000/conversations" \
 [
   {
     "id": "123e4567-e89b-12d3-a456-426614174000",
-    "title": "The Wobbly Noodle Chat"
+    "title": "2026-11-24 at 15:30:45"
   }
 ]
 ```
