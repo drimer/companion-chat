@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    CORS_ORIGINS: list[str] = []
+    CORS_ORIGINS: str = ""
 
     AWS_ENDPOINT_URL: str = ""
     AWS_REGION: str | None = None
